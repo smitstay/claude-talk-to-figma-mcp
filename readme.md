@@ -1,13 +1,17 @@
-# Cursor Talk to Figma MCP
+# Claude Talk to Figma MCP
 
-This project implements a Model Context Protocol (MCP) integration between Cursor AI and Figma, allowing Cursor to communicate with Figma for reading designs and modifying them programmatically.
+This project implements a Model Context Protocol (MCP) integration between Claude Desktop and Figma, allowing Claude to communicate with Figma for reading designs and modifying them programmatically.
 
 https://github.com/user-attachments/assets/129a14d2-ed73-470f-9a4c-2240b2a4885c
+
+## Acerca de este proyecto
+
+Este es un fork adaptado del proyecto original "Cursor Talk to Figma MCP", modificado específicamente para trabajar con Claude Desktop en lugar de Cursor. Permite que utilices Claude para interactuar con tus diseños de Figma, analizar componentes, modificar elementos y automatizar tareas de diseño.
 
 ## Project Structure
 
 - `src/talk_to_figma_mcp/` - TypeScript MCP server for Figma integration
-- `src/cursor_mcp_plugin/` - Figma plugin for communicating with Cursor
+- `src/claude_mcp_plugin/` - Figma plugin for communicating with Claude
 - `src/socket.ts` - WebSocket server that facilitates communication between the MCP server and Figma plugin
 
 ## Get Started
@@ -18,7 +22,7 @@ https://github.com/user-attachments/assets/129a14d2-ed73-470f-9a4c-2240b2a4885c
 curl -fsSL https://bun.sh/install | bash
 ```
 
-2. Run setup, this will also install MCP in your Cursor's active project
+2. Run setup, this will also install MCP in your Claude Desktop
 
 ```bash
 bun setup
@@ -33,7 +37,7 @@ bun socket
 4. MCP server
 
 ```bash
-bunx cursor-talk-to-figma-mcp
+bunx claude-talk-to-figma-mcp
 ```
 
 5. Install [Figma Plugin](#figma-plugin)
@@ -50,16 +54,16 @@ Thanks to [@dusskapark](https://github.com/dusskapark) for contributing the bulk
 
 ## Manual Setup and Installation
 
-### MCP Server: Integration with Cursor
+### MCP Server: Integration with Claude Desktop
 
-Add the server to your Cursor MCP configuration in `~/.cursor/mcp.json`:
+Add the server to your Claude Desktop MCP configuration (see the [Claude Desktop Configuration](#claude-desktop-configuration) section for details):
 
 ```json
 {
   "mcpServers": {
-    "TalkToFigma": {
+    "ClaudeTalkToFigma": {
       "command": "bunx",
-      "args": ["cursor-talk-to-figma-mcp@latest"]
+      "args": ["claude-talk-to-figma-mcp@latest"]
     }
   }
 }
@@ -77,7 +81,7 @@ bun socket
 
 1. In Figma, go to Plugins > Development > New Plugin
 2. Choose "Link existing plugin"
-3. Select the `src/cursor_mcp_plugin/manifest.json` file
+3. Select the `src/claude_mcp_plugin/manifest.json` file
 4. The plugin should now be available in your Figma development plugins
 
 ## Windows + WSL Guide
@@ -104,10 +108,10 @@ bun socket
 ## Usage
 
 1. Start the WebSocket server
-2. Install the MCP server in Cursor
-3. Open Figma and run the Cursor MCP Plugin
+2. Install the MCP server in Claude Desktop
+3. Open Figma and run the Claude MCP Plugin
 4. Connect the plugin to the WebSocket server by joining a channel using `join_channel`
-5. Use Cursor to communicate with Figma using the MCP tools
+5. Use Claude to communicate with Figma using the MCP tools
 
 ## MCP Tools
 
@@ -168,7 +172,7 @@ The MCP server provides the following tools for interacting with Figma:
 1. Navigate to the Figma plugin directory:
 
    ```
-   cd src/cursor_mcp_plugin
+   cd src/claude_mcp_plugin
    ```
 
 2. Edit code.js and ui.html
@@ -199,3 +203,71 @@ When working with the Figma MCP:
 ## License
 
 MIT
+
+## Claude Desktop Configuration
+
+Para configurar este MCP en Claude Desktop, hay dos opciones:
+
+### Opción 1: Configuración automática (recomendada)
+
+Ejecuta el script de configuración incluido:
+
+```bash
+bun run configure-claude
+```
+
+Este script detectará automáticamente la ubicación del archivo de configuración de Claude Desktop, creará una copia de seguridad de la configuración existente si la hay, y añadirá la configuración necesaria para usar este MCP.
+
+### Opción 2: Configuración manual
+
+1. Localiza el archivo de configuración de Claude Desktop:
+   - En macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - En Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+2. Añade la siguiente configuración:
+
+```json
+{
+  "mcpServers": {
+    "ClaudeTalkToFigma": {
+      "command": "bunx",
+      "args": ["claude-talk-to-figma-mcp@latest"]
+    }
+  }
+}
+```
+
+### Uso en Claude Desktop
+
+1. Reinicia Claude Desktop si está ejecutándose
+2. Inicia el servidor WebSocket: `bun socket`
+3. Abre Claude Desktop y selecciona "ClaudeTalkToFigma" en la lista de MCPs
+4. Instala y ejecuta el plugin de Figma según las instrucciones de la sección [Figma Plugin](#figma-plugin)
+
+### Ejemplos de Prompts para Claude
+
+Una vez conectado, puedes utilizar prompts como estos para interactuar con Figma:
+
+#### Análisis de documentos
+
+```
+Analiza mi documento de Figma actual y dime qué elementos contiene.
+```
+
+#### Modificación de elementos
+
+```
+Selecciona el elemento con id "123:456" y cambia su color de fondo a rojo (#FF0000).
+```
+
+#### Automatización de tareas
+
+```
+Busca todos los nodos de texto en el documento y muéstrame aquellos que contienen la palabra "botón".
+```
+
+#### Creación de elementos
+
+```
+Crea un nuevo rectángulo con esquinas redondeadas de 10px, tamaño de 200x100 y color de fondo azul (#0000FF).
+```
