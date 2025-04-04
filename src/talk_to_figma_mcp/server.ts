@@ -56,7 +56,7 @@ let currentChannel: string | null = null;
 // Create MCP server
 const server = new McpServer({
   name: "ClaudeTalkToFigmaMCP",
-  version: "1.0.0",
+  version: "0.1.0",
 });
 
 // Add command line argument parsing
