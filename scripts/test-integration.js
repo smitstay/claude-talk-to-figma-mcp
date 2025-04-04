@@ -107,7 +107,7 @@ async function checkDependencies() {
   }
 }
 
-// Verificar configuración de Claude Desktop
+// Check Claude Desktop configuration
 async function checkClaudeConfig() {
   log.step('Verifying Claude Desktop configuration');
 
@@ -152,7 +152,7 @@ async function checkClaudeConfig() {
   }
 }
 
-// Iniciar servidor WebSocket
+// Start WebSocket server
 async function startWebSocketServer() {
   log.step('Starting WebSocket server');
   
@@ -194,7 +194,7 @@ async function startWebSocketServer() {
   return wsServer;
 }
 
-// Verificar estado del servidor WebSocket
+// Check WebSocket server status
 async function checkWebSocketStatus() {
   log.step('Verifying WebSocket server status');
   
@@ -243,7 +243,7 @@ async function checkWebSocketStatus() {
   }
 }
 
-// Verificar plugin de Figma
+// Check Figma plugin
 async function checkFigmaPlugin() {
   log.step('Verifying Figma plugin');
   
@@ -298,17 +298,17 @@ async function checkFigmaPlugin() {
   }
 }
 
-// Realizar pruebas de integración
+// Run integration tests
 async function runIntegrationTests() {
   log.title('CLAUDE-FIGMA INTEGRATION TESTS');
   
-  // Verificar dependencias
+  // Check dependencies
   await checkDependencies();
   
-  // Verificar configuración de Claude
+  // Check Claude configuration
   await checkClaudeConfig();
   
-  // Iniciar y verificar servidor WebSocket
+  // Start and verify WebSocket server
   const wsServer = await startWebSocketServer();
   const serverStatus = await checkWebSocketStatus();
   
@@ -318,7 +318,7 @@ async function runIntegrationTests() {
     process.exit(1);
   }
   
-  // Verificar plugin de Figma
+  // Check Figma plugin
   await checkFigmaPlugin();
   
   // Instructions for manual tests
