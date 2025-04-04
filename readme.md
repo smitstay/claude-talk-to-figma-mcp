@@ -39,6 +39,7 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
    ```bash
    bun run configure-claude
    ```
+   Restart Claude Desktop if it was open.
 
 ## 🔌 Usage
 
@@ -46,28 +47,22 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
 
 To use Claude with Figma, follow these steps in order:
 
-1. **Configure Claude Desktop**:
-   ```bash
-   bun run configure-claude
-   ```
-   Restart Claude Desktop if it was open.
-
-2. **Start the WebSocket server**:
+1. **Start the WebSocket server**:
    ```bash
    bun socket
    ```
    Verify it's running with `http://localhost:3055/status`
 
-3. **Install the Figma plugin**:
+2. **Install the Figma plugin**:
    Import `src/claude_mcp_plugin/manifest.json` in Figma.
 
-4. **Connect the plugin to the server**:
+3. **Connect the plugin to the server**:
    Open the plugin in Figma and enter port 3055.
 
-5. **Select the MCP in Claude Desktop**:
+4. **Select the MCP in Claude Desktop**:
    Open Claude Desktop and select "ClaudeTalkToFigma" from the MCPs selector.
 
-6. **Ready to use!** Now you can send commands to Figma from Claude.
+5. **Ready to use!** Now you can send commands to Figma from Claude.
 
 The following diagram illustrates the integration architecture:
 
