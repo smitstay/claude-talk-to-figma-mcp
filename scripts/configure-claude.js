@@ -68,7 +68,7 @@ try {
 config.mcpServers = config.mcpServers || {};
 config.mcpServers['ClaudeTalkToFigma'] = {
   command: useBun ? 'bunx' : 'npx',
-  args: [`${packageName}@${packageVersion}`]
+  args: [`${packageName}@latest`]
 };
 
 console.log('Updated configuration for ClaudeTalkToFigma:');
@@ -82,7 +82,7 @@ try {
   console.log('\nTo use this MCP in Claude Desktop:');
   console.log('1. Restart Claude Desktop if it\'s running');
   console.log('2. Open Claude Desktop and select "ClaudeTalkToFigma" from the MCPs list');
-  console.log('3. Start the WebSocket server: bun socket');
+  console.log(`3. Start the WebSocket server: ${useBun ? 'bunx' : 'npx'} ${packageName}-socket`);
   console.log('4. Install and run the Figma plugin');
 } catch (e) {
   console.error(`Error writing configuration: ${e.message}`);

@@ -2,8 +2,6 @@
 
 This project implements a Model Context Protocol (MCP) integration between Claude Desktop and Figma, allowing Claude to communicate with Figma for reading designs and modifying them programmatically.
 
-https://github.com/user-attachments/assets/129a14d2-ed73-470f-9a4c-2240b2a4885c
-
 ## About this project
 
 This is an adapted fork of the original "Cursor Talk to Figma MCP" project, specifically modified to work with Claude Desktop instead of Cursor. It allows you to use Claude to interact with your Figma designs, analyze components, modify elements, and automate design tasks.
