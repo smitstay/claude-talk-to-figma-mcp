@@ -1,28 +1,13 @@
 #!/bin/bash
 
-# Create .cursor directory if it doesn't exist
-mkdir -p .cursor
-
-# Instalar dependencias
-echo "Instalando dependencias..."
+# Install dependencies
+echo "Installing dependencies..."
 bun install
 
-# Configurar para Claude Desktop
-echo "Configurando para Claude Desktop..."
+# Configure for Claude Desktop
+echo "Configuring for Claude Desktop..."
 node scripts/configure-claude.js
 
-echo "Configuración completada."
-echo "Para usar el MCP, asegúrate de iniciar el servidor WebSocket:"
-echo "bun socket"
-
-# Create mcp.json with the current directory path
-echo "{
-  \"mcpServers\": {
-    \"TalkToFigma\": {
-      \"command\": \"bunx\",
-      \"args\": [
-        \"cursor-talk-to-figma-mcp@latest\"
-      ]
-    }
-  }
-}" > .cursor/mcp.json 
+echo "Configuration completed."
+echo "To use the MCP, make sure to start the WebSocket server:"
+echo "bun socket" 

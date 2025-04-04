@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.join(__dirname, '..');
 
-// Colores para la consola
+// Console colors
 const colors = {
   reset: '\x1b[0m',
   green: '\x1b[32m',
@@ -29,11 +29,11 @@ const log = {
   success: (msg) => console.log(`${colors.green}[✓]${colors.reset} ${msg}`),
   warning: (msg) => console.log(`${colors.yellow}[WARN]${colors.reset} ${msg}`),
   error: (msg) => console.log(`${colors.red}[ERROR]${colors.reset} ${msg}`),
-  step: (msg) => console.log(`\n${colors.cyan}${colors.bold}[PASO]${colors.reset} ${msg}`),
+  step: (msg) => console.log(`\n${colors.cyan}${colors.bold}[STEP]${colors.reset} ${msg}`),
   title: (msg) => console.log(`\n${colors.magenta}${colors.bold}== ${msg} ==${colors.reset}\n`)
 };
 
-// Función para crear una interfaz de lectura para entrada del usuario
+// Function to create a readline interface for user input
 function createInterface() {
   return readline.createInterface({
     input: process.stdin,
@@ -41,7 +41,7 @@ function createInterface() {
   });
 }
 
-// Función para preguntar al usuario
+// Function to ask the user a question
 async function askQuestion(question) {
   const rl = createInterface();
   return new Promise(resolve => {
@@ -52,7 +52,7 @@ async function askQuestion(question) {
   });
 }
 
-// Verificar si el puerto está en uso
+// Check if port is in use
 function isPortInUse(port) {
   try {
     const server = createServer();
@@ -73,104 +73,104 @@ function isPortInUse(port) {
       server.listen(port);
     });
   } catch (err) {
-    log.error(`Error al verificar el puerto ${port}: ${err.message}`);
-    return Promise.resolve(true); // Asumimos que está en uso si hay un error
+    log.error(`Error checking port ${port}: ${err.message}`);
+    return Promise.resolve(true); // Assume it's in use if there's an error
   }
 }
 
 // Verificar dependencias
 async function checkDependencies() {
-  log.step('Verificando dependencias instaladas');
+  log.step('Verifying installed dependencies');
   
   try {
-    log.info('Verificando Bun...');
+    log.info('Verifying Bun...');
     execSync('bun --version', { stdio: 'pipe' });
-    log.success('Bun está instalado');
+    log.success('Bun is installed');
   } catch (err) {
-    log.error('Bun no está instalado. Por favor, instálalo desde https://bun.sh');
+    log.error('Bun is not installed. Please install it from https://bun.sh');
     process.exit(1);
   }
 
   // Verificar MCP SDK
   try {
-    log.info('Verificando @modelcontextprotocol/sdk...');
+    log.info('Verifying @modelcontextprotocol/sdk...');
     const packageJson = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
     if (packageJson.dependencies['@modelcontextprotocol/sdk']) {
-      log.success('MCP SDK está incluido en el package.json');
+      log.success('MCP SDK is included in package.json');
     } else {
-      log.error('MCP SDK no está incluido en el package.json');
+      log.error('MCP SDK is not included in package.json');
       process.exit(1);
     }
   } catch (err) {
-    log.error(`No se pudo leer package.json: ${err.message}`);
+    log.error(`Could not read package.json: ${err.message}`);
     process.exit(1);
   }
 }
 
 // Verificar configuración de Claude Desktop
 async function checkClaudeConfig() {
-  log.step('Verificando configuración de Claude Desktop');
+  log.step('Verifying Claude Desktop configuration');
 
   const configPath = process.platform === 'darwin' 
     ? path.join(process.env.HOME, 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json')
     : path.join(process.env.APPDATA || '', 'Claude', 'claude_desktop_config.json');
 
-  log.info(`Buscando archivo de configuración en: ${configPath}`);
+  log.info(`Looking for configuration file in: ${configPath}`);
   
   try {
     if (!fs.existsSync(configPath)) {
-      log.warning('Archivo de configuración de Claude Desktop no encontrado');
-      const shouldConfigure = await askQuestion('¿Deseas configurar Claude Desktop ahora? (s/n)');
+      log.warning('Claude Desktop configuration file not found');
+      const shouldConfigure = await askQuestion('Do you want to configure Claude Desktop now? (y/n)');
       
-      if (shouldConfigure.toLowerCase() === 's') {
-        log.info('Ejecutando script de configuración...');
+      if (shouldConfigure.toLowerCase() === 'y') {
+        log.info('Running configuration script...');
         execSync('bun run configure-claude', { stdio: 'inherit', cwd: rootDir });
-        log.success('Configuración completada');
+        log.success('Configuration completed');
       } else {
-        log.warning('Configuración omitida. El MCP puede no funcionar correctamente');
+        log.warning('Configuration skipped. MCP may not work correctly');
       }
       return;
     }
     
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     if (config.mcpServers && config.mcpServers['ClaudeTalkToFigma']) {
-      log.success('Configuración de ClaudeTalkToFigma encontrada en Claude Desktop');
+      log.success('ClaudeTalkToFigma configuration found in Claude Desktop');
     } else {
-      log.warning('ClaudeTalkToFigma no está configurado en Claude Desktop');
-      const shouldConfigure = await askQuestion('¿Deseas configurar Claude Desktop ahora? (s/n)');
+      log.warning('ClaudeTalkToFigma is not configured in Claude Desktop');
+      const shouldConfigure = await askQuestion('Do you want to configure Claude Desktop now? (y/n)');
       
-      if (shouldConfigure.toLowerCase() === 's') {
-        log.info('Ejecutando script de configuración...');
+      if (shouldConfigure.toLowerCase() === 'y') {
+        log.info('Running configuration script...');
         execSync('bun run configure-claude', { stdio: 'inherit', cwd: rootDir });
-        log.success('Configuración completada');
+        log.success('Configuration completed');
       } else {
-        log.warning('Configuración omitida. El MCP puede no funcionar correctamente');
+        log.warning('Configuration skipped. MCP may not work correctly');
       }
     }
   } catch (err) {
-    log.error(`Error al verificar configuración: ${err.message}`);
+    log.error(`Error verifying configuration: ${err.message}`);
   }
 }
 
 // Iniciar servidor WebSocket
 async function startWebSocketServer() {
-  log.step('Iniciando servidor WebSocket');
+  log.step('Starting WebSocket server');
   
-  // Verificar si el puerto 3055 está en uso
+  // Check if port 3055 is in use
   const portInUse = await isPortInUse(3055);
   if (portInUse) {
-    log.warning('El puerto 3055 ya está en uso. Posiblemente el servidor WebSocket ya está ejecutándose.');
-    const shouldContinue = await askQuestion('¿Deseas continuar con las pruebas? (s/n)');
-    if (shouldContinue.toLowerCase() !== 's') {
-      log.info('Pruebas canceladas. Libera el puerto 3055 e intenta nuevamente.');
+    log.warning('Port 3055 is already in use. Possibly the WebSocket server is already running.');
+    const shouldContinue = await askQuestion('Do you want to continue with tests? (y/n)');
+    if (shouldContinue.toLowerCase() !== 'y') {
+      log.info('Tests cancelled. Release port 3055 and try again.');
       process.exit(0);
     }
     
-    log.info('Continuando pruebas con el servidor WebSocket actual');
+    log.info('Continuing tests with existing WebSocket server');
     return null;
   }
   
-  log.info('Iniciando servidor WebSocket en puerto 3055...');
+  log.info('Starting WebSocket server on port 3055...');
   const wsServer = spawn('bun', ['run', 'src/socket.ts'], { 
     cwd: rootDir,
     stdio: ['ignore', 'pipe', 'pipe']
@@ -179,7 +179,7 @@ async function startWebSocketServer() {
   wsServer.stdout.on('data', (data) => {
     const message = data.toString().trim();
     if (message.includes('WebSocket server running')) {
-      log.success('Servidor WebSocket iniciado correctamente');
+      log.success('WebSocket server started successfully');
     }
     console.log(`${colors.cyan}[WebSocket]${colors.reset} ${message}`);
   });
@@ -188,7 +188,7 @@ async function startWebSocketServer() {
     console.error(`${colors.red}[WebSocket Error]${colors.reset} ${data.toString().trim()}`);
   });
   
-  // Esperar a que el servidor inicie
+  // Wait for the server to start
   await new Promise(resolve => setTimeout(resolve, 1000));
   
   return wsServer;
@@ -196,17 +196,17 @@ async function startWebSocketServer() {
 
 // Verificar estado del servidor WebSocket
 async function checkWebSocketStatus() {
-  log.step('Verificando estado del servidor WebSocket');
+  log.step('Verifying WebSocket server status');
   
   try {
-    log.info('Consultando endpoint de estado...');
+    log.info('Consulting status endpoint...');
     
-    // Realizar petición HTTP al endpoint de estado
+    // Perform HTTP request to status endpoint
     const fetchStatus = async () => {
       try {
         const response = await fetch('http://localhost:3055/status');
         if (!response.ok) {
-          throw new Error(`Respuesta inesperada: ${response.status} ${response.statusText}`);
+          throw new Error(`Unexpected response: ${response.status} ${response.statusText}`);
         }
         return await response.json();
       } catch (err) {
@@ -214,7 +214,7 @@ async function checkWebSocketStatus() {
       }
     };
     
-    // Intentar hasta 3 veces con espera de 1 segundo entre intentos
+    // Try up to 3 times with 1 second wait between attempts
     let status = null;
     let tries = 0;
     while (tries < 3) {
@@ -224,7 +224,7 @@ async function checkWebSocketStatus() {
       } catch (err) {
         tries++;
         if (tries < 3) {
-          log.warning(`Intento ${tries} fallido: ${err.message}`);
+          log.warning(`Attempt ${tries} failed: ${err.message}`);
           await new Promise(r => setTimeout(r, 1000));
         } else {
           throw err;
@@ -233,74 +233,74 @@ async function checkWebSocketStatus() {
     }
     
     if (status) {
-      log.success('Servidor WebSocket está ejecutándose');
-      log.info(`Estadísticas: ${JSON.stringify(status.stats)}`);
+      log.success('WebSocket server is running');
+      log.info(`Statistics: ${JSON.stringify(status.stats)}`);
       return true;
     }
   } catch (err) {
-    log.error(`No se pudo verificar el estado del servidor: ${err.message}`);
+    log.error(`Could not verify server status: ${err.message}`);
     return false;
   }
 }
 
 // Verificar plugin de Figma
 async function checkFigmaPlugin() {
-  log.step('Verificando plugin de Figma');
+  log.step('Verifying Figma plugin');
   
   const pluginPath = path.join(rootDir, 'src', 'claude_mcp_plugin');
   
   try {
-    log.info(`Verificando directorio del plugin: ${pluginPath}`);
+    log.info(`Verifying plugin directory: ${pluginPath}`);
     
     if (!fs.existsSync(pluginPath)) {
-      log.error('Directorio del plugin no encontrado');
+      log.error('Plugin directory not found');
       return false;
     }
     
     const manifestPath = path.join(pluginPath, 'manifest.json');
     if (!fs.existsSync(manifestPath)) {
-      log.error('Archivo manifest.json no encontrado');
+      log.error('manifest.json file not found');
       return false;
     }
     
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    log.success(`Plugin '${manifest.name}' (ID: ${manifest.id}) encontrado`);
+    log.success(`Plugin '${manifest.name}' (ID: ${manifest.id}) found`);
     
-    // Verificar archivos del plugin
+    // Verify plugin files
     const requiredFiles = ['manifest.json', 'code.js', 'ui.html'];
     for (const file of requiredFiles) {
       const filePath = path.join(pluginPath, file);
       if (!fs.existsSync(filePath)) {
-        log.error(`Archivo ${file} no encontrado`);
+        log.error(`File ${file} not found`);
         return false;
       }
     }
     
-    log.success('Todos los archivos del plugin están presentes');
-    log.info('\nPara instalar el plugin en Figma:');
-    log.info('1. Abre Figma');
-    log.info('2. Ve a Plugins > Development > New Plugin');
-    log.info('3. Haz clic en "Link existing plugin"');
-    log.info(`4. Selecciona el archivo: ${manifestPath}`);
+    log.success('All plugin files are present');
+    log.info('\nTo install the plugin in Figma:');
+    log.info('1. Open Figma');
+    log.info('2. Go to Plugins > Development > New Plugin');
+    log.info('3. Click on "Link existing plugin"');
+    log.info(`4. Select the file: ${manifestPath}`);
     
-    // Preguntar si el usuario ya ha instalado el plugin
-    const isPluginInstalled = await askQuestion('¿Has instalado el plugin en Figma? (s/n)');
-    if (isPluginInstalled.toLowerCase() !== 's') {
-      log.warning('Por favor, instala el plugin antes de continuar con las pruebas');
+    // Ask if the user has already installed the plugin
+    const isPluginInstalled = await askQuestion('Have you installed the plugin in Figma? (y/n)');
+    if (isPluginInstalled.toLowerCase() !== 'y') {
+      log.warning('Please install the plugin before continuing with tests');
     } else {
-      log.success('Plugin instalado según el usuario');
+      log.success('Plugin installed as per user');
     }
     
     return true;
   } catch (err) {
-    log.error(`Error al verificar plugin: ${err.message}`);
+    log.error(`Error verifying plugin: ${err.message}`);
     return false;
   }
 }
 
 // Realizar pruebas de integración
 async function runIntegrationTests() {
-  log.title('PRUEBAS DE INTEGRACIÓN CLAUDE-FIGMA');
+  log.title('CLAUDE-FIGMA INTEGRATION TESTS');
   
   // Verificar dependencias
   await checkDependencies();
@@ -313,7 +313,7 @@ async function runIntegrationTests() {
   const serverStatus = await checkWebSocketStatus();
   
   if (!serverStatus) {
-    log.error('No se pudo verificar el servidor WebSocket. Abortando pruebas.');
+    log.error('Could not verify WebSocket server. Aborting tests.');
     if (wsServer) wsServer.kill();
     process.exit(1);
   }
@@ -321,41 +321,41 @@ async function runIntegrationTests() {
   // Verificar plugin de Figma
   await checkFigmaPlugin();
   
-  // Instrucciones para pruebas manuales
-  log.step('Realizando pruebas manuales de integración');
+  // Instructions for manual tests
+  log.step('Performing manual integration tests');
   
-  log.info('\nPara completar las pruebas de integración, sigue estos pasos:');
-  log.info('1. Abre Claude Desktop');
-  log.info('2. Selecciona "ClaudeTalkToFigma" en el selector de MCPs');
-  log.info('3. Abre Figma y ejecuta el plugin');
-  log.info('4. En el plugin, conéctate al servidor WebSocket (puerto 3055)');
-  log.info('5. Prueba estos comandos en Claude:');
-  log.info('   - "Conéctate a Figma usando el canal default"');
-  log.info('   - "Obtén información sobre el documento actual"');
-  log.info('   - "Obtén información sobre la selección actual"');
+  log.info('\nTo complete integration tests, follow these steps:');
+  log.info('1. Open Claude Desktop');
+  log.info('2. Select "ClaudeTalkToFigma" in the MCP selector');
+  log.info('3. Open Figma and run the plugin');
+  log.info('4. In the plugin, connect to WebSocket server (port 3055)');
+  log.info('5. Test these commands in Claude:');
+  log.info('   - "Connect to Figma using the default channel"');
+  log.info('   - "Get information about the current document"');
+  log.info('   - "Get information about the current selection"');
   
-  log.title('PRUEBAS COMPLETADAS');
-  log.info('El script de pruebas ha completado todas las verificaciones automatizadas.');
-  log.info('Por favor, continúa con las pruebas manuales según las instrucciones anteriores.');
+  log.title('TESTS COMPLETED');
+  log.info('The test script has completed all automated checks.');
+  log.info('Please continue manual tests according to the instructions above.');
   
-  // Preguntar si desea mantener el servidor WebSocket ejecutándose
+  // Ask if you want to keep the WebSocket server running
   if (wsServer) {
-    const keepServerRunning = await askQuestion('¿Deseas mantener el servidor WebSocket ejecutándose? (s/n)');
-    if (keepServerRunning.toLowerCase() !== 's') {
-      log.info('Deteniendo servidor WebSocket...');
+    const keepServerRunning = await askQuestion('Do you want to keep the WebSocket server running? (y/n)');
+    if (keepServerRunning.toLowerCase() !== 'y') {
+      log.info('Stopping WebSocket server...');
       wsServer.kill();
-      log.success('Servidor WebSocket detenido');
+      log.success('WebSocket server stopped');
     } else {
-      log.info('El servidor WebSocket continuará ejecutándose en segundo plano.');
-      log.info('Para detenerlo, presiona Ctrl+C en la terminal o utiliza el administrador de tareas.');
-      // Desconectar proceso del terminal para que siga ejecutándose
+      log.info('WebSocket server will continue running in the background.');
+      log.info('To stop it, press Ctrl+C in the terminal or use task manager.');
+      // Disconnect process from terminal so it continues running
       wsServer.unref();
     }
   }
 }
 
-// Ejecutar pruebas
+// Run tests
 runIntegrationTests().catch(err => {
-  log.error(`Error durante las pruebas: ${err.message}`);
+  log.error(`Error during tests: ${err.message}`);
   process.exit(1);
 }); 

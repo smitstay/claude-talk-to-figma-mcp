@@ -10,81 +10,81 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Determinar la ubicación del archivo de configuración de Claude Desktop
+// Determine the location of Claude Desktop configuration file
 const configPath = os.platform() === 'darwin' 
   ? path.join(os.homedir(), 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json')
   : path.join(os.homedir(), 'AppData', 'Roaming', 'Claude', 'claude_desktop_config.json');
 
-// Obtener la ruta absoluta de package.json
+// Get the absolute path of package.json
 const packageJsonPath = path.join(__dirname, '..', 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const packageName = packageJson.name;
 const packageVersion = packageJson.version;
 
-console.log(`Configurando Claude Desktop para ${packageName} v${packageVersion}...`);
+console.log(`Configuring Claude Desktop for ${packageName} v${packageVersion}...`);
 
-// Crear copias de seguridad
+// Create backups
 function backupFile(filePath) {
   if (fs.existsSync(filePath)) {
     const backupPath = `${filePath}.backup-${Date.now()}`;
     fs.copyFileSync(filePath, backupPath);
-    console.log(`Backup creado en: ${backupPath}`);
+    console.log(`Backup created at: ${backupPath}`);
   }
 }
 
-// Leer configuración existente o crear nueva
+// Read existing configuration or create new one
 let config = {};
 try {
   if (fs.existsSync(configPath)) {
     config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    console.log('Configuración existente encontrada.');
+    console.log('Existing configuration found.');
     backupFile(configPath);
   } else {
-    console.log('No se encontró configuración existente. Creando nueva.');
+    console.log('No existing configuration found. Creating new one.');
     
-    // Crear directorios necesarios si no existen
+    // Create required directories if they don't exist
     const configDir = path.dirname(configPath);
     if (!fs.existsSync(configDir)) {
       fs.mkdirSync(configDir, { recursive: true });
-      console.log(`Directorio creado: ${configDir}`);
+      console.log(`Directory created: ${configDir}`);
     }
   }
 } catch (e) {
-  console.error(`Error al leer la configuración existente: ${e.message}`);
-  console.error('Creando nueva configuración.');
+  console.error(`Error reading existing configuration: ${e.message}`);
+  console.error('Creating new configuration.');
 }
 
-// Verificar si bun está instalado
+// Check if bun is installed
 let useBun = false;
 try {
   execSync('bun --version', { stdio: 'ignore' });
   useBun = true;
-  console.log('Bun detectado en el sistema.');
+  console.log('Bun detected on the system.');
 } catch (e) {
-  console.log('Bun no está instalado. Se usará npx como alternativa.');
+  console.log('Bun is not installed. Using npx as an alternative.');
 }
 
-// Añadir configuración del MCP
+// Add MCP configuration
 config.mcpServers = config.mcpServers || {};
 config.mcpServers['ClaudeTalkToFigma'] = {
   command: useBun ? 'bunx' : 'npx',
   args: [`${packageName}@${packageVersion}`]
 };
 
-console.log('Configuración actualizada para ClaudeTalkToFigma:');
+console.log('Updated configuration for ClaudeTalkToFigma:');
 console.log(JSON.stringify(config.mcpServers['ClaudeTalkToFigma'], null, 2));
 
-// Escribir configuración
+// Write configuration
 try {
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-  console.log(`Configuración guardada en ${configPath}`);
-  console.log('\nConfiguración completada con éxito.');
-  console.log('\nPara utilizar este MCP en Claude Desktop:');
-  console.log('1. Reinicia Claude Desktop si está ejecutándose');
-  console.log('2. Abre Claude Desktop y selecciona "ClaudeTalkToFigma" en la lista de MCPs');
-  console.log('3. Inicia el servidor WebSocket: bun socket');
-  console.log('4. Instala y ejecuta el plugin de Figma');
+  console.log(`Configuration saved to ${configPath}`);
+  console.log('\nConfiguration completed successfully.');
+  console.log('\nTo use this MCP in Claude Desktop:');
+  console.log('1. Restart Claude Desktop if it\'s running');
+  console.log('2. Open Claude Desktop and select "ClaudeTalkToFigma" from the MCPs list');
+  console.log('3. Start the WebSocket server: bun socket');
+  console.log('4. Install and run the Figma plugin');
 } catch (e) {
-  console.error(`Error al escribir la configuración: ${e.message}`);
-  console.error(`Asegúrate de tener permisos de escritura en: ${configPath}`);
+  console.error(`Error writing configuration: ${e.message}`);
+  console.error(`Make sure you have write permissions for: ${configPath}`);
 } 

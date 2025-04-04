@@ -1,130 +1,130 @@
-# Guía de Pruebas para Claude Talk to Figma MCP
+# Testing Guide for Claude Talk to Figma MCP
 
-Este documento proporciona una guía detallada para probar la integración entre Claude Desktop y Figma, así como soluciones a problemas comunes.
+This document provides a detailed guide for testing the integration between Claude Desktop and Figma, as well as solutions to common problems.
 
-## Requisitos previos
+## Prerequisites
 
-Antes de comenzar las pruebas, asegúrate de tener:
+Before starting the tests, make sure you have:
 
-- Claude Desktop instalado
-- Cuenta de Figma con acceso a la creación de plugins
-- Bun instalado (v1.0.0 o superior)
-- Permisos para instalar plugins en Figma
+- Claude Desktop installed
+- Figma account with plugin creation access
+- Bun installed (v1.0.0 or higher)
+- Permissions to install plugins in Figma
 
-## Casos de Prueba
+## Test Cases
 
-### 1. Configuración del entorno
+### 1. Environment Setup
 
-| Caso de prueba | Pasos | Resultado esperado |
+| Test case | Steps | Expected result |
 | -------------- | ----- | ------------------ |
-| Instalación de dependencias | Ejecutar `bun install` | Todas las dependencias se instalan sin errores |
-| Configuración de Claude | Ejecutar `bun run configure-claude` | Script ejecutado correctamente, mensaje de configuración exitosa |
-| Verificar configuración | Revisar archivo `claude_desktop_config.json` | Contiene la configuración para "ClaudeTalkToFigma" |
+| Dependencies installation | Run `bun install` | All dependencies are installed without errors |
+| Claude configuration | Run `bun run configure-claude` | Script executed correctly, successful configuration message |
+| Verify configuration | Check `claude_desktop_config.json` file | Contains configuration for "ClaudeTalkToFigma" |
 
-### 2. Configuración del servidor WebSocket
+### 2. WebSocket Server Configuration
 
-| Caso de prueba | Pasos | Resultado esperado |
+| Test case | Steps | Expected result |
 | -------------- | ----- | ------------------ |
-| Iniciar servidor WebSocket | Ejecutar `bun socket` | Servidor inicia en puerto 3055, muestra mensaje de confirmación |
-| Verificar estado del servidor | Acceder a `http://localhost:3055/status` | Devuelve JSON con estado "running" y estadísticas |
-| Probar reconexión | Detener y volver a iniciar el servidor | Cliente se reconecta automáticamente |
+| Start WebSocket server | Run `bun socket` | Server starts on port 3055, shows confirmation message |
+| Verify server status | Access `http://localhost:3055/status` | Returns JSON with "running" status and statistics |
+| Test reconnection | Stop and restart the server | Client reconnects automatically |
 
-### 3. Instalación del plugin de Figma
+### 3. Figma Plugin Installation
 
-| Caso de prueba | Pasos | Resultado esperado |
+| Test case | Steps | Expected result |
 | -------------- | ----- | ------------------ |
-| Importar plugin | Importar `src/claude_mcp_plugin/manifest.json` en Figma | Plugin aparece en menú de desarrollo |
-| Ejecutar plugin | Abrir plugin desde Figma | Interfaz de usuario del plugin se muestra correctamente |
-| Conexión al servidor | Ingresar puerto 3055 y conectar | Mensaje "Conectado a Claude MCP server" |
+| Import plugin | Import `src/claude_mcp_plugin/manifest.json` in Figma | Plugin appears in development menu |
+| Run plugin | Open plugin from Figma | Plugin user interface displays correctly |
+| Connect to server | Enter port 3055 and connect | "Connected to Claude MCP server" message |
 
-### 4. Pruebas de integración Claude-MCP-Figma
+### 4. Claude-MCP-Figma Integration Tests
 
-| Caso de prueba | Pasos | Resultado esperado |
+| Test case | Steps | Expected result |
 | -------------- | ----- | ------------------ |
-| Obtener info del documento | Preguntar a Claude sobre el documento abierto | Claude devuelve información sobre el documento |
-| Obtener selección | Seleccionar elemento en Figma y preguntar a Claude | Claude devuelve detalles del elemento seleccionado |
-| Crear elemento | Pedir a Claude que cree un rectángulo | Rectángulo creado en documento de Figma |
-| Modificar elemento | Pedir a Claude que cambie color de un elemento | Color del elemento cambiado correctamente |
-| Operación compleja | Pedir a Claude que busque texto y lo modifique | Texto modificado correctamente en múltiples nodos |
+| Get document info | Ask Claude about the open document | Claude returns information about the document |
+| Get selection | Select element in Figma and ask Claude | Claude returns details of the selected element |
+| Create element | Ask Claude to create a rectangle | Rectangle created in Figma document |
+| Modify element | Ask Claude to change color of an element | Element color changed correctly |
+| Complex operation | Ask Claude to find text and modify it | Text correctly modified in multiple nodes |
 
-## Solución de Problemas Comunes
+## Common Problems and Solutions
 
-### Problemas de conexión
+### Connection Problems
 
-| Problema | Posible causa | Solución |
+| Problem | Possible cause | Solution |
 | -------- | ------------- | -------- |
-| "No se puede conectar al servidor WebSocket" | Servidor no está ejecutándose | Ejecutar `bun socket` en terminal |
-| "Error de conexión: puerto en uso" | Puerto 3055 ocupado | Liberar puerto o cambiar configuración de puerto |
-| "No se puede conectar desde plugin" | Restricciones de CORS | Verificar que el plugin use el dominio correcto |
-| "Conexión rechazada" | Firewall bloqueando conexión | Permitir conexiones al puerto 3055 en firewall |
+| "Cannot connect to WebSocket server" | Server is not running | Run `bun socket` in terminal |
+| "Connection error: port in use" | Port 3055 is occupied | Free the port or change port configuration |
+| "Cannot connect from plugin" | CORS restrictions | Verify that the plugin uses the correct domain |
+| "Connection rejected" | Firewall blocking connection | Allow connections to port 3055 in firewall |
 
-### Problemas con Claude Desktop
+### Problems with Claude Desktop
 
-| Problema | Posible causa | Solución |
+| Problem | Possible cause | Solution |
 | -------- | ------------- | -------- |
-| "MCP no aparece en Claude Desktop" | Configuración incorrecta | Verificar archivo de configuración y ejecutar `bun run configure-claude` |
-| "Claude no responde a comandos de Figma" | MCP no seleccionado | Seleccionar "ClaudeTalkToFigma" en el menú de MCPs |
-| "Error al ejecutar comando MCP" | Dependencias faltantes | Reinstalar con `bun install` |
-| "Claude no puede ejecutar comandos en Figma" | Canal no unido | Verificar que se ejecutó `join_channel` |
+| "MCP does not appear in Claude Desktop" | Incorrect configuration | Verify configuration file and run `bun run configure-claude` |
+| "Claude does not respond to Figma commands" | MCP not selected | Select "ClaudeTalkToFigma" in the MCPs menu |
+| "Error executing MCP command" | Missing dependencies | Reinstall with `bun install` |
+| "Claude cannot execute commands in Figma" | Channel not joined | Verify that `join_channel` was executed |
 
-### Problemas con Figma
+### Problems with Figma
 
-| Problema | Posible causa | Solución |
+| Problem | Possible cause | Solution |
 | -------- | ------------- | -------- |
-| "Plugin no aparece en Figma" | Importación incorrecta | Verificar ruta y reimportar el plugin |
-| "Error al ejecutar comandos en Figma" | Permisos insuficientes | Verificar permisos en manifest.json |
-| "No se pueden modificar elementos" | Documento en modo solo lectura | Abrir documento en modo edición |
-| "Error al crear elementos" | Selección incorrecta | Verificar que la página o frame destino esté seleccionado |
+| "Plugin does not appear in Figma" | Incorrect import | Verify path and reimport the plugin |
+| "Error executing commands in Figma" | Insufficient permissions | Verify permissions in manifest.json |
+| "Cannot modify elements" | Document in read-only mode | Open document in edit mode |
+| "Error creating elements" | Incorrect selection | Verify that the target page or frame is selected |
 
-## Diagnóstico y Depuración
+## Diagnostics and Debugging
 
-### Herramientas de Diagnóstico
+### Diagnostic Tools
 
-1. **Logs del servidor WebSocket**:
-   - Los logs detallados se muestran en la terminal donde ejecutas `bun socket`
-   - Busca mensajes de tipo ERROR o WARN para identificar problemas
+1. **WebSocket Server Logs**:
+   - Detailed logs are shown in the terminal where you run `bun socket`
+   - Look for ERROR or WARN messages to identify problems
 
-2. **Endpoint de estado**:
-   - Accede a `http://localhost:3055/status` para verificar estadísticas
-   - Comprueba conexiones activas y errores acumulados
+2. **Status Endpoint**:
+   - Access `http://localhost:3055/status` to verify statistics
+   - Check active connections and accumulated errors
 
-3. **Consola de Figma**:
-   - Abre la consola de desarrollo en Figma (F12 o Cmd+Option+I)
-   - Revisa mensajes de error relacionados con el plugin
+3. **Figma Console**:
+   - Open the development console in Figma (F12 or Cmd+Option+I)
+   - Review error messages related to the plugin
 
-4. **Verificación de configuración**:
-   - Examina `claude_desktop_config.json` para confirmar la correcta configuración
+4. **Configuration Verification**:
+   - Examine `claude_desktop_config.json` to confirm correct configuration
 
-### Pasos para Depuración Sistemática
+### Systematic Debugging Steps
 
-1. **Verificar componentes individuales**:
-   - Confirma que el servidor WebSocket está funcionando
-   - Verifica que el plugin de Figma puede abrirse
-   - Comprueba que Claude Desktop reconoce el MCP
+1. **Verify Individual Components**:
+   - Confirm that the WebSocket server is running
+   - Verify that the Figma plugin can be opened
+   - Check that Claude Desktop recognizes the MCP
 
-2. **Probar comunicación por partes**:
-   - Prueba la conexión del plugin al WebSocket directamente
-   - Verifica que Claude puede ejecutar comandos MCP básicos
-   - Confirma que los comandos llegan al plugin de Figma
+2. **Test Communication in Parts**:
+   - Test the plugin's connection to the WebSocket directly
+   - Verify that Claude can execute basic MCP commands
+   - Confirm that commands reach the Figma plugin
 
-3. **Reiniciar componentes en orden**:
-   - Reinicia el servidor WebSocket
-   - Recarga el plugin en Figma
-   - Reinicia Claude Desktop
+3. **Restart Components in Order**:
+   - Restart the WebSocket server
+   - Reload the plugin in Figma
+   - Restart Claude Desktop
 
-4. **Actualizar versiones**:
-   - Asegúrate de tener las últimas versiones de todas las dependencias
-   - Verifica compatibilidad con la versión actual de Figma
+4. **Update Versions**:
+   - Make sure you have the latest versions of all dependencies
+   - Verify compatibility with the current version of Figma
 
-## Lista de Verificación para Pruebas Integrales
+## Comprehensive Testing Checklist
 
-- [ ] Configuración de Claude Desktop completada
-- [ ] Servidor WebSocket iniciado y funcionando
-- [ ] Plugin de Figma instalado y conectado
-- [ ] Claude Desktop puede obtener información del documento
-- [ ] Claude Desktop puede obtener selección actual
-- [ ] Claude Desktop puede crear nuevos elementos
-- [ ] Claude Desktop puede modificar elementos existentes
-- [ ] Claude Desktop puede escanear y modificar texto
-- [ ] El sistema se recupera correctamente de desconexiones
-- [ ] Los errores son manejados y reportados adecuadamente 
+- [ ] Claude Desktop configuration completed
+- [ ] WebSocket server started and running
+- [ ] Figma plugin installed and connected
+- [ ] Claude Desktop can get document information
+- [ ] Claude Desktop can get current selection
+- [ ] Claude Desktop can create new elements
+- [ ] Claude Desktop can modify existing elements
+- [ ] Claude Desktop can scan and modify text
+- [ ] The system recovers correctly from disconnections
+- [ ] Errors are handled and reported correctly 

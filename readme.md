@@ -4,9 +4,9 @@ This project implements a Model Context Protocol (MCP) integration between Claud
 
 https://github.com/user-attachments/assets/129a14d2-ed73-470f-9a4c-2240b2a4885c
 
-## Acerca de este proyecto
+## About this project
 
-Este es un fork adaptado del proyecto original "Cursor Talk to Figma MCP", modificado específicamente para trabajar con Claude Desktop en lugar de Cursor. Permite que utilices Claude para interactuar con tus diseños de Figma, analizar componentes, modificar elementos y automatizar tareas de diseño.
+This is an adapted fork of the original "Cursor Talk to Figma MCP" project, specifically modified to work with Claude Desktop instead of Cursor. It allows you to use Claude to interact with your Figma designs, analyze components, modify elements, and automate design tasks.
 
 ## Project Structure
 
@@ -206,25 +206,25 @@ MIT
 
 ## Claude Desktop Configuration
 
-Para configurar este MCP en Claude Desktop, hay dos opciones:
+To configure this MCP in Claude Desktop, there are two options:
 
-### Opción 1: Configuración automática (recomendada)
+### Option 1: Automatic configuration (recommended)
 
-Ejecuta el script de configuración incluido:
+Run the included configuration script:
 
 ```bash
 bun run configure-claude
 ```
 
-Este script detectará automáticamente la ubicación del archivo de configuración de Claude Desktop, creará una copia de seguridad de la configuración existente si la hay, y añadirá la configuración necesaria para usar este MCP.
+This script will automatically detect the location of the Claude Desktop configuration file, create a backup of the existing configuration if available, and add the necessary configuration to use this MCP.
 
-### Opción 2: Configuración manual
+### Option 2: Manual configuration
 
-1. Localiza el archivo de configuración de Claude Desktop:
-   - En macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - En Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+1. Locate the Claude Desktop configuration file:
+   - On macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - On Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
-2. Añade la siguiente configuración:
+2. Add the following configuration:
 
 ```json
 {
@@ -237,37 +237,37 @@ Este script detectará automáticamente la ubicación del archivo de configuraci
 }
 ```
 
-### Uso en Claude Desktop
+### Using with Claude Desktop
 
-1. Reinicia Claude Desktop si está ejecutándose
-2. Inicia el servidor WebSocket: `bun socket`
-3. Abre Claude Desktop y selecciona "ClaudeTalkToFigma" en la lista de MCPs
-4. Instala y ejecuta el plugin de Figma según las instrucciones de la sección [Figma Plugin](#figma-plugin)
+1. Restart Claude Desktop if it's running
+2. Start the WebSocket server: `bun socket`
+3. Open Claude Desktop and select "ClaudeTalkToFigma" from the MCPs list
+4. Install and run the Figma plugin following the instructions in the [Figma Plugin](#figma-plugin) section
 
-### Ejemplos de Prompts para Claude
+### Example Prompts for Claude
 
-Una vez conectado, puedes utilizar prompts como estos para interactuar con Figma:
+Once connected, you can use prompts like these to interact with Figma:
 
-#### Análisis de documentos
-
-```
-Analiza mi documento de Figma actual y dime qué elementos contiene.
-```
-
-#### Modificación de elementos
+#### Document Analysis
 
 ```
-Selecciona el elemento con id "123:456" y cambia su color de fondo a rojo (#FF0000).
+Analyze my current Figma document and tell me what elements it contains.
 ```
 
-#### Automatización de tareas
+#### Element Modification
 
 ```
-Busca todos los nodos de texto en el documento y muéstrame aquellos que contienen la palabra "botón".
+Select the element with id "123:456" and change its background color to red (#FF0000).
 ```
 
-#### Creación de elementos
+#### Task Automation
 
 ```
-Crea un nuevo rectángulo con esquinas redondeadas de 10px, tamaño de 200x100 y color de fondo azul (#0000FF).
+Find all text nodes in the document and show me those containing the word "button".
+```
+
+#### Element Creation
+
+```
+Create a new rectangle with 10px rounded corners, 200x100 size, and blue background color (#0000FF).
 ```
