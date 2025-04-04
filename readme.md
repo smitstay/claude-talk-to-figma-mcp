@@ -127,7 +127,7 @@ For "ClaudeTalkToFigma" to appear in the list of available MCPs in Claude Deskto
      {
        "mcpServers": {
          "ClaudeTalkToFigma": {
-           "command": "bunx",
+           "command": "npx",
            "args": ["claude-talk-to-figma-mcp@latest"]
          }
        }
@@ -203,10 +203,9 @@ If you encounter problems, check the [Testing Guide](TESTING.md) for solutions t
 
 ### Common Issues
 
-- **Connection Error**: Make sure the WebSocket server is running with `bun socket`
+- **Connection Error**: Make sure the WebSocket server is running with `npx claude-talk-to-figma-mcp-socket`
 - **Plugin Not Appearing**: Verify that you've correctly imported the manifest.json file
 - **Claude Can't Find the MCP**: Make sure you've run `bun run configure-claude` and restarted Claude Desktop
-- **Error Starting the MCP**: Verify that Bun is correctly installed on your system
 - **Claude Not Responding**: Confirm you've selected "ClaudeTalkToFigma" in the MCPs menu
 - **Execution Errors**: Check the Figma development console for detailed messages
 
