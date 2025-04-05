@@ -69,6 +69,8 @@ Once installed, you just need to start it:
    bun socket
    ```
    Verify it's running with `http://localhost:3055/status`
+   
+   To stop the server, press `Ctrl+C` in the terminal.
 
 3. **Connect the plugin to the server**:
 
