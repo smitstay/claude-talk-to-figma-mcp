@@ -14,9 +14,11 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
 
 ## 📋 Prerequisites
 
-- [Claude Desktop](https://claude.ai) installed
+- [Claude Desktop](https://claude.ai/download) installed
 - [Figma](https://figma.com) account
-- [Bun](https://bun.sh) v1.0.0 or higher
+- [Bun](https://bun.sh) v1.0.0 or higher 
+  - Linux macOS ```curl -fsSL https://bun.sh/install | bash```
+  - Windows ```powershell -c "irm bun.sh/install.ps1 | iex"```
 - [Cursor Talk to Figma MCP Plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin) installed in Figma
 
 ## ⚙️ Installation
@@ -37,17 +39,30 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
    bun run build
    ```
 
-4. Configure the plugin in Claude Desktop:
+4. Configure the MCP in Claude Desktop:
    ```bash
    bun run configure-claude
    ```
    Restart Claude Desktop if it was open.
 
-## 🔌 Usage
+   > **Note**: This script does the following:
+   
+   - Locates the Claude Desktop configuration file:
+     - On macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+     - On Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+   - Creates a backup of the existing configuration file
+   - Modifies or creates the configuration file to include "ClaudeTalkToFigma" in the list of MCPs
+   - Configures the command that Claude Desktop should execute to start the MCP
 
-### Complete Workflow
+5. Install the Figma plugin
+   [Cursor Talk to Figma MCP Plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin)
+   > **Note**: This project originally included a custom Figma plugin, but we now use the official plugin from Figma Community which provides the same functionality. The original plugin has been archived in this repository for reference.
 
-To use Claude with Figma, follow these steps in order:
+## 🚀 Usage
+
+### 🔌 Starting Up
+
+Once installed, you just need to start it:
 
 1. **Start the WebSocket server**:
    ```bash
@@ -55,150 +70,88 @@ To use Claude with Figma, follow these steps in order:
    ```
    Verify it's running with `http://localhost:3055/status`
 
-2. **Install the Figma plugin**:
-   Install the [Cursor Talk to Figma MCP Plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin) from the Figma Community.
-
 3. **Connect the plugin to the server**:
-   Open the plugin in Figma and enter port 3055.
 
-4. **Select the MCP in Claude Desktop**:
-   Open Claude Desktop and select "ClaudeTalkToFigma" from the MCPs selector.
+   Open the plugin in Figma and enter port 3055. This generates a channel ID, copy it to provide it to Claude.
 
-5. **Ready to use!** Now you can send commands to Figma from Claude.
+   ![Figma Plugin Configuration](images/mcp-figma-plugin-configuration.png)
 
-The following diagram illustrates the integration architecture:
+4. **Claude Desktop**:
 
-```
-+----------------+         +------------------+         +---------------+
-|                |         |                  |         |               |
-| Claude Desktop |<------->|  WebSocket Srv  |<------->| Figma Plugin  |
-|   (AI Agent)   |  MCP    |  (Port 3055)    |         |  (UI Plugin)  |
-|                |         |                  |         |               |
-+----------------+         +------------------+         +---------------+
-```
+   Open Claude Desktop and confirm that "ClaudeTalkToFigma" appears in the MCPs selector.
 
-### Starting the WebSocket Server
+5. **Ready to use!**
 
-```bash
-bun socket
-```
+   Now you can send commands to Figma from Claude.
 
-The WebSocket server will start on port 3055 by default. You can verify the status by accessing `http://localhost:3055/status`.
+### 🧠 Prompting
 
-### Installing the Figma Plugin
+1. Before you start designing with Claude, make it an expert in UX/UI 🎨
 
-1. Install the [Cursor Talk to Figma MCP Plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin) from the Figma Community.
-2. The plugin will appear in your plugins list in Figma.
-
-> **Note**: This project originally included a custom Figma plugin, but we now use the official plugin from Figma Community which provides the same functionality. The original plugin has been archived in this repository for reference.
-
-## ⚡ Claude Desktop Configuration
-
-For "ClaudeTalkToFigma" to appear in the list of available MCPs in Claude Desktop, follow these steps:
-
-1. **Run the configuration script**:
-   ```bash
-   bun run configure-claude
+2. Now tell Claude to connect to your Figma project:
    ```
-   
-   This script does the following:
-   
-   - Locates the Claude Desktop configuration file:
-     - On macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-     - On Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-   
-   - Creates a backup of the existing configuration file
-   
-   - Modifies or creates the configuration file to include "ClaudeTalkToFigma" in the list of MCPs
-   
-   - Configures the command that Claude Desktop should execute to start the MCP
+   Talk to Figma, channel {channel-ID}
+   ```
 
-2. **Restart Claude Desktop**:
-   If Claude Desktop was open during configuration, you must close and reopen it for the changes to take effect.
+## 🏛️ Architecture:
 
-3. **Verify the configuration**:
-   If the MCP doesn't appear in the list after restarting Claude Desktop, you can verify that the configuration was applied correctly:
-   
-   - Open the configuration file manually:
-     - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-     - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-   
-   - Check that there's a `mcpServers` section with an entry for `ClaudeTalkToFigma`
-   
-   - It should look like this:
-     ```json
-     {
-       "mcpServers": {
-         "ClaudeTalkToFigma": {
-           "command": "npx",
-           "args": ["claude-talk-to-figma-mcp@latest"]
-         }
-       }
-     }
-     ```
-
-### Connecting Claude to Figma
-
-1. Open the Cursor Talk to Figma MCP Plugin in Figma from the plugins menu
-2. Enter port 3055 (or the custom port if you've changed the configuration)
-3. Click "Connect"
-4. Once connected, you'll see "Connected to Claude MCP server"
-5. In Claude Desktop, select "ClaudeTalkToFigma" from the list of available MCPs
+```
++----------------+     +-------+     +---------------+     +---------------+
+|                |     |       |     |               |     |               |
+| Claude Desktop |<--->|  MCP  |<--->| WebSocket Srv |<--->| Figma Plugin  |
+|   (AI Agent)   |     |       |     |  (Port 3055)  |     |  (UI Plugin)  |
+|                |     |       |     |               |     |               |
++----------------+     +-------+     +---------------+     +---------------+
+```
 
 ## 🛠️ Available Commands
 
-Claude can execute a wide variety of commands in Figma:
+As Claude is connected to our MCP, it already knows the list of tools to manipulate Figma. But if you want, you can mention them in your prompts:  
 
-- **Get Information**
-  - View current document information
-  - Get selection details
-  - Explore specific node properties
-
-- **Create Elements**
-  - Create rectangles, frames, and texts
-  - Create component instances
-  - Clone existing nodes
-
-- **Modify Elements**
-  - Change fill and stroke colors
-  - Modify size and position
-  - Edit text content
-  - Adjust corner radius
-
-- **Advanced Manipulation**
-  - Scan text nodes
-  - Apply batch modifications
-  - Export nodes as images
-
-## 🔍 Usage Examples
-
-### Get Document Information
-
-In Claude:
-```
-Can you show me information about my current Figma document?
-```
-
-### Create a Rectangle
-
-In Claude:
-```
-Create a red rectangle of 200x200 pixels at position x:100, y:100
-```
-
-### Modify Selected Text
-
-In Claude:
-```
-Change the text of the selected element to "New Title"
-```
-
-### Scan and Replace Text
-
-In Claude:
-```
-Find all texts containing "Lorem Ipsum" and replace them with "Real Content"
-```
+- `clone_node`  
+  Clone an existing node in Figma
+- `create_component_instance`  
+  Create an instance of a component in Figma
+- `create_frame`  
+  Create a new frame in Figma
+- `create_rectangle`  
+  Create a new rectangle in Figma
+- `create_text`  
+  Create a new text element in Figma
+- `delete_node`  
+  Delete a node from Figma
+- `export_node_as_image`  
+  Export a node as an image from Figma
+- `get_document_info`  
+  Get detailed information about the current Figma document
+- `get_local_components`  
+  Get all local components from the Figma document
+- `get_node_info`  
+  Get detailed information about a specific node in Figma
+- `get_nodes_info`  
+  Get detailed information about multiple nodes in Figma
+- `get_selection`  
+  Get information about the current selection in Figma
+- `get_styles`  
+  Get all styles from the current Figma document
+- `join_channel`  
+  Join a specific channel to communicate with Figma
+- `move_node`  
+  Move a node to a new position in Figma
+- `resize_node`  
+  Resize a node in Figma
+- `scan_text_nodes`  
+  Scan all text nodes in the selected Figma node
+- `set_corner_radius`  
+  Set the corner radius of a node in Figma
+- `set_fill_color`  
+  Set the fill color of a node in Figma can be TextNode or FrameNode
+- `set_multiple_text_contents`  
+  Set multiple text contents parallelly in a node
+- `set_stroke_color`  
+  Set the stroke color of a node in Figmaå
+- `set_text_content`  
+  Set the text content of an existing text node in Figma
 
 ## 🐛 Troubleshooting
 
@@ -246,4 +199,5 @@ This project is under the MIT License - see the [LICENSE](LICENSE) file for deta
 - Anthropic team for Claude and the Model Context Protocol
 - Figma community for their excellent plugin API
 - Sonny Lazuardi for the original Cursor Talk to Figma MCP implementation
+- Bun team for providing a fast JavaScript runtime 
 - Bun team for providing a fast JavaScript runtime 
