@@ -88,7 +88,9 @@ Once installed, you just need to start it:
 
 ### 🧠 Prompting
 
-1. Before you start designing with Claude, make it an expert in UX/UI 🎨
+1. Before you start designing with Claude, [make it an expert in UX/UI](prompts/prompt-ux-ui-specialist.md) 🎨
+   
+   > **Note**: Also in [Galician](prompts/prompt-ux-ui-especialista-gal.md), [Português](prompts/prompt-ux-ui-especialista-pt.md) and [Español](prompts/prompt-ux-ui-especialista-es.md).
 
 2. Now tell Claude to connect to your Figma project:
    ```
