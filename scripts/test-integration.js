@@ -245,51 +245,29 @@ async function checkWebSocketStatus() {
 
 // Check Figma plugin
 async function checkFigmaPlugin() {
-  log.step('Verifying Figma plugin');
-  
-  const pluginPath = path.join(rootDir, 'src', 'claude_mcp_plugin');
+  log.step('Verifying Figma plugin access');
   
   try {
-    log.info(`Verifying plugin directory: ${pluginPath}`);
-    
-    if (!fs.existsSync(pluginPath)) {
-      log.error('Plugin directory not found');
-      return false;
-    }
-    
-    const manifestPath = path.join(pluginPath, 'manifest.json');
-    if (!fs.existsSync(manifestPath)) {
-      log.error('manifest.json file not found');
-      return false;
-    }
-    
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    log.success(`Plugin '${manifest.name}' (ID: ${manifest.id}) found`);
-    
-    // Verify plugin files
-    const requiredFiles = ['manifest.json', 'code.js', 'ui.html'];
-    for (const file of requiredFiles) {
-      const filePath = path.join(pluginPath, file);
-      if (!fs.existsSync(filePath)) {
-        log.error(`File ${file} not found`);
-        return false;
-      }
-    }
-    
-    log.success('All plugin files are present');
-    log.info('\nTo install the plugin in Figma:');
-    log.info('1. Open Figma');
-    log.info('2. Go to Plugins > Development > New Plugin');
-    log.info('3. Click on "Link existing plugin"');
-    log.info(`4. Select the file: ${manifestPath}`);
+    log.info('This project now uses the official Cursor Talk to Figma MCP Plugin from Figma Community');
+    log.info('Plugin URL: https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin');
     
     // Ask if the user has already installed the plugin
-    const isPluginInstalled = await askQuestion('Have you installed the plugin in Figma? (y/n)');
+    const isPluginInstalled = await askQuestion('Have you installed the Cursor Talk to Figma MCP Plugin from Figma Community? (y/n)');
     if (isPluginInstalled.toLowerCase() !== 'y') {
-      log.warning('Please install the plugin before continuing with tests');
+      log.warning('Please install the plugin from Figma Community before continuing with tests');
+      log.info('1. Open Figma');
+      log.info('2. Go to Community > Plugins');
+      log.info('3. Search for "Cursor Talk to Figma MCP"');
+      log.info('4. Install the plugin by Sonny Lazuardi');
+      return false;
     } else {
       log.success('Plugin installed as per user');
     }
+    
+    log.info('\nTo use the plugin in Figma:');
+    log.info('1. Open Figma');
+    log.info('2. Go to Plugins > Cursor Talk to Figma MCP Plugin');
+    log.info('3. Enter port 3055 and connect to the WebSocket server');
     
     return true;
   } catch (err) {
@@ -327,7 +305,7 @@ async function runIntegrationTests() {
   log.info('\nTo complete integration tests, follow these steps:');
   log.info('1. Open Claude Desktop');
   log.info('2. Select "ClaudeTalkToFigma" in the MCP selector');
-  log.info('3. Open Figma and run the plugin');
+  log.info('3. Open Figma and run the Cursor Talk to Figma MCP Plugin');
   log.info('4. In the plugin, connect to WebSocket server (port 3055)');
   log.info('5. Test these commands in Claude:');
   log.info('   - "Connect to Figma using the default channel"');
