@@ -29,13 +29,32 @@ Before starting the tests, make sure you have:
 | Verify server status | Access `http://localhost:3055/status` | Returns JSON with "running" status and statistics |
 | Test reconnection | Stop and restart the server | Client reconnects automatically |
 
-### 3. Figma Plugin Installation
+### 3. Figma Plugin Setup
 
-| Test case | Steps | Expected result |
-| -------------- | ----- | ------------------ |
-| Import plugin | Import `src/claude_mcp_plugin/manifest.json` in Figma | Plugin appears in development menu |
-| Run plugin | Open plugin from Figma | Plugin user interface displays correctly |
-| Connect to server | Enter port 3055 and connect | "Connected to Claude MCP server" message |
+#### Install the Figma Plugin
+
+1. Install the [Cursor Talk to Figma MCP Plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin) from Figma Community
+2. Open Figma and locate the plugin in your plugins list
+3. Run the plugin
+
+#### Connect Plugin to WebSocket Server
+
+1. The plugin will ask for a port number (default: 3055)
+2. Enter the port number where your WebSocket server is running
+3. Click "Connect"
+4. You should see a "Connected to Claude MCP server" message
+
+#### Integration Test
+
+To test if the Figma plugin is correctly communicating with the Claude MCP server:
+
+1. Start the WebSocket server
+2. Open Figma and run the Cursor Talk to Figma MCP Plugin
+3. Connect to the WebSocket server 
+4. Open Claude Desktop and select the "ClaudeTalkToFigma" MCP
+5. Test a simple command in Claude like: "Can you show me information about my current Figma document?"
+
+Claude should be able to communicate with Figma and return information about the document.
 
 ### 4. Claude-MCP-Figma Integration Tests
 

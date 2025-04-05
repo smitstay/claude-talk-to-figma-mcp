@@ -2,6 +2,8 @@
 
 A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact directly with Figma, enabling powerful AI-assisted design capabilities.
 
+> **Important**: This project is based on [cursor-talk-to-figma-mcp](https://github.com/sonnylazuardi/cursor-talk-to-figma-mcp) by Sonny Lazuardi. It has been adapted to work with Claude Desktop instead of Cursor. The original implementation and main credit belongs to Sonny Lazuardi ❤️
+
 ## 🚀 Features
 
 - **Native Claude Integration**: Allows Claude to communicate with Figma through the Model Context Protocol (MCP)
@@ -13,9 +15,9 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
 ## 📋 Prerequisites
 
 - [Claude Desktop](https://claude.ai) installed
-- [Figma](https://figma.com) account with plugin creation access
+- [Figma](https://figma.com) account
 - [Bun](https://bun.sh) v1.0.0 or higher
-- Permissions to install plugins in Figma
+- [Cursor Talk to Figma MCP Plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin) installed in Figma
 
 ## ⚙️ Installation
 
@@ -54,7 +56,7 @@ To use Claude with Figma, follow these steps in order:
    Verify it's running with `http://localhost:3055/status`
 
 2. **Install the Figma plugin**:
-   Import `src/claude_mcp_plugin/manifest.json` in Figma.
+   Install the [Cursor Talk to Figma MCP Plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin) from the Figma Community.
 
 3. **Connect the plugin to the server**:
    Open the plugin in Figma and enter port 3055.
@@ -85,9 +87,10 @@ The WebSocket server will start on port 3055 by default. You can verify the stat
 
 ### Installing the Figma Plugin
 
-1. Open Figma and select "Plugins" > "Development" > "Import plugin from manifest..."
-2. Select the `src/claude_mcp_plugin/manifest.json` file from this repository
-3. The plugin will now appear in your development menu
+1. Install the [Cursor Talk to Figma MCP Plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin) from the Figma Community.
+2. The plugin will appear in your plugins list in Figma.
+
+> **Note**: This project originally included a custom Figma plugin, but we now use the official plugin from Figma Community which provides the same functionality. The original plugin has been archived in this repository for reference.
 
 ## ⚡ Claude Desktop Configuration
 
@@ -136,7 +139,7 @@ For "ClaudeTalkToFigma" to appear in the list of available MCPs in Claude Deskto
 
 ### Connecting Claude to Figma
 
-1. Open the plugin in Figma from the plugins menu
+1. Open the Cursor Talk to Figma MCP Plugin in Figma from the plugins menu
 2. Enter port 3055 (or the custom port if you've changed the configuration)
 3. Click "Connect"
 4. Once connected, you'll see "Connected to Claude MCP server"
@@ -199,12 +202,12 @@ Find all texts containing "Lorem Ipsum" and replace them with "Real Content"
 
 ## 🐛 Troubleshooting
 
-If you encounter problems, check the [Testing Guide](TESTING.md) for solutions to common issues and diagnostic steps.
+If you encounter problems, check the following common issues:
 
 ### Common Issues
 
 - **Connection Error**: Make sure the WebSocket server is running with `npx claude-talk-to-figma-mcp-socket`
-- **Plugin Not Appearing**: Verify that you've correctly imported the manifest.json file
+- **Plugin Not Appearing**: Verify that you've correctly installed the plugin from Figma Community
 - **Claude Can't Find the MCP**: Make sure you've run `bun run configure-claude` and restarted Claude Desktop
 - **Claude Not Responding**: Confirm you've selected "ClaudeTalkToFigma" in the MCPs menu
 - **Execution Errors**: Check the Figma development console for detailed messages
@@ -235,10 +238,12 @@ This project is under the MIT License - see the [LICENSE](LICENSE) file for deta
 
 ## 👥 Authors
 
-- **Xúlio Zé** - *Initial work* - [GitHub](https://github.com/arinspunk)
+- **Xúlio Zé** - *Adaptation for Claude* - [GitHub](https://github.com/arinspunk)
+- **Sonny Lazuardi** - *Original Cursor implementation* - [GitHub](https://github.com/sonnylazuardi)
 
 ## 🙏 Acknowledgments
 
 - Anthropic team for Claude and the Model Context Protocol
 - Figma community for their excellent plugin API
+- Sonny Lazuardi for the original Cursor Talk to Figma MCP implementation
 - Bun team for providing a fast JavaScript runtime 
