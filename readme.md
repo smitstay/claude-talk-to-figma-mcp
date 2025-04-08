@@ -56,7 +56,6 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
 
 5. Install the Figma plugin
    [Cursor Talk to Figma MCP Plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin)
-   > **Note**: This project originally included a custom Figma plugin, but we now use the official plugin from Figma Community which provides the same functionality. The original plugin has been archived in this repository for reference.
 
 ## 🚀 Usage
 
