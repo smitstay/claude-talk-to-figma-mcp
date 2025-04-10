@@ -167,6 +167,10 @@ async function handleCommand(command, params) {
       return await loadFontAsyncWrapper(params);
     case "get_remote_components":
       return await getRemoteComponents(params);
+    case "set_effects":
+      return await setEffects(params);
+    case "set_effect_style_id":
+      return await setEffectStyleId(params);
     default:
       throw new Error(`Unknown command: ${command}`);
   }
@@ -2399,5 +2403,116 @@ async function getRemoteComponents() {
       apiAvailable: true,
       methodExists: true
     };
+  }
+}
+
+// Set Effects Tool
+async function setEffects(params) {
+  const { nodeId, effects } = params || {};
+  
+  if (!nodeId) {
+    throw new Error("Missing nodeId parameter");
+  }
+  
+  if (!effects || !Array.isArray(effects)) {
+    throw new Error("Missing or invalid effects parameter. Must be an array.");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (!("effects" in node)) {
+    throw new Error(`Node does not support effects: ${nodeId}`);
+  }
+  
+  try {
+    // Convert incoming effects to valid Figma effects
+    const validEffects = effects.map(effect => {
+      // Ensure all effects have the required properties
+      if (!effect.type) {
+        throw new Error("Each effect must have a type property");
+      }
+      
+      // Create a clean effect object based on type
+      switch (effect.type) {
+        case "DROP_SHADOW":
+        case "INNER_SHADOW":
+          return {
+            type: effect.type,
+            color: effect.color || { r: 0, g: 0, b: 0, a: 0.5 },
+            offset: effect.offset || { x: 0, y: 0 },
+            radius: effect.radius || 5,
+            spread: effect.spread || 0,
+            visible: effect.visible !== undefined ? effect.visible : true,
+            blendMode: effect.blendMode || "NORMAL"
+          };
+        case "LAYER_BLUR":
+        case "BACKGROUND_BLUR":
+          return {
+            type: effect.type,
+            radius: effect.radius || 5,
+            visible: effect.visible !== undefined ? effect.visible : true
+          };
+        default:
+          throw new Error(`Unsupported effect type: ${effect.type}`);
+      }
+    });
+    
+    // Apply the effects to the node
+    node.effects = validEffects;
+    
+    return {
+      id: node.id,
+      name: node.name,
+      effects: node.effects
+    };
+  } catch (error) {
+    throw new Error(`Error setting effects: ${error.message}`);
+  }
+}
+
+// Set Effect Style ID Tool
+async function setEffectStyleId(params) {
+  const { nodeId, effectStyleId } = params || {};
+  
+  if (!nodeId) {
+    throw new Error("Missing nodeId parameter");
+  }
+  
+  if (!effectStyleId) {
+    throw new Error("Missing effectStyleId parameter");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (!("effectStyleId" in node)) {
+    throw new Error(`Node does not support effect styles: ${nodeId}`);
+  }
+  
+  try {
+    // Try to find the effect style by ID
+    const effectStyles = await figma.getLocalEffectStylesAsync();
+    const foundStyle = effectStyles.find(style => style.id === effectStyleId);
+    
+    if (!foundStyle) {
+      throw new Error(`Effect style not found with ID: ${effectStyleId}`);
+    }
+    
+    // Apply the effect style to the node
+    node.effectStyleId = effectStyleId;
+    
+    return {
+      id: node.id,
+      name: node.name,
+      effectStyleId: node.effectStyleId,
+      appliedEffects: node.effects
+    };
+  } catch (error) {
+    throw new Error(`Error setting effect style ID: ${error.message}`);
   }
 }
