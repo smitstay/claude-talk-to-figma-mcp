@@ -144,6 +144,29 @@ async function handleCommand(command, params) {
       return await setMultipleTextContents(params);
     case "set_auto_layout":
       return await setAutoLayout(params);
+    // Nuevos comandos para propiedades de texto
+    case "set_font_name":
+      return await setFontName(params);
+    case "set_font_size":
+      return await setFontSize(params);
+    case "set_font_weight":
+      return await setFontWeight(params);
+    case "set_letter_spacing":
+      return await setLetterSpacing(params);
+    case "set_line_height":
+      return await setLineHeight(params);
+    case "set_paragraph_spacing":
+      return await setParagraphSpacing(params);
+    case "set_text_case":
+      return await setTextCase(params);
+    case "set_text_decoration":
+      return await setTextDecoration(params);
+    case "get_styled_text_segments":
+      return await getStyledTextSegments(params);
+    case "load_font_async":
+      return await loadFontAsyncWrapper(params);
+    case "get_remote_components":
+      return await getRemoteComponents(params);
     default:
       throw new Error(`Unknown command: ${command}`);
   }
@@ -1901,28 +1924,28 @@ async function setAutoLayout(params) {
     throw new Error(`Node not found with ID: ${nodeId}`);
   }
 
-  // Verificar que el nodo es un frame o grupo
+  // Check if the node is a frame or group
   if (!("layoutMode" in node)) {
     throw new Error(`Node does not support auto layout: ${nodeId}`);
   }
 
-  // Configurar el modo de layout
+  // Configure layout mode
   if (layoutMode === "NONE") {
     node.layoutMode = "NONE";
   } else {
-    // Establecer propiedades de auto layout
+    // Set auto layout properties
     node.layoutMode = layoutMode;
     
-    // Configurar padding si se proporciona
+    // Configure padding if provided
     if (paddingTop !== undefined) node.paddingTop = paddingTop;
     if (paddingBottom !== undefined) node.paddingBottom = paddingBottom;
     if (paddingLeft !== undefined) node.paddingLeft = paddingLeft;
     if (paddingRight !== undefined) node.paddingRight = paddingRight;
     
-    // Configurar espaciado entre items
+    // Configure item spacing
     if (itemSpacing !== undefined) node.itemSpacing = itemSpacing;
     
-    // Configurar alineación
+    // Configure alignment
     if (primaryAxisAlignItems !== undefined) {
       node.primaryAxisAlignItems = primaryAxisAlignItems;
     }
@@ -1931,12 +1954,12 @@ async function setAutoLayout(params) {
       node.counterAxisAlignItems = counterAxisAlignItems;
     }
     
-    // Configurar wrap
+    // Configure wrap
     if (layoutWrap !== undefined) {
       node.layoutWrap = layoutWrap;
     }
     
-    // Configurar inclusión de bordes
+    // Configure stroke inclusion
     if (strokesIncludedInLayout !== undefined) {
       node.strokesIncludedInLayout = strokesIncludedInLayout;
     }
@@ -1956,4 +1979,425 @@ async function setAutoLayout(params) {
     layoutWrap: node.layoutWrap,
     strokesIncludedInLayout: node.strokesIncludedInLayout
   };
+}
+
+// Nuevas funciones para propiedades de texto
+
+async function setFontName(params) {
+  const { nodeId, family, style } = params || {};
+  if (!nodeId || !family) {
+    throw new Error("Missing nodeId or font family");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync({ family, style: style || "Regular" });
+    node.fontName = { family, style: style || "Regular" };
+    return {
+      id: node.id,
+      name: node.name,
+      fontName: node.fontName
+    };
+  } catch (error) {
+    throw new Error(`Error setting font name: ${error.message}`);
+  }
+}
+
+async function setFontSize(params) {
+  const { nodeId, fontSize } = params || {};
+  if (!nodeId || fontSize === undefined) {
+    throw new Error("Missing nodeId or fontSize");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.fontSize = fontSize;
+    return {
+      id: node.id,
+      name: node.name,
+      fontSize: node.fontSize
+    };
+  } catch (error) {
+    throw new Error(`Error setting font size: ${error.message}`);
+  }
+}
+
+async function setFontWeight(params) {
+  const { nodeId, weight } = params || {};
+  if (!nodeId || weight === undefined) {
+    throw new Error("Missing nodeId or weight");
+  }
+  
+  // Map weight to font style
+  const getFontStyle = (weight) => {
+    switch (weight) {
+      case 100: return "Thin";
+      case 200: return "Extra Light";
+      case 300: return "Light";
+      case 400: return "Regular";
+      case 500: return "Medium";
+      case 600: return "Semi Bold";
+      case 700: return "Bold";
+      case 800: return "Extra Bold";
+      case 900: return "Black";
+      default: return "Regular";
+    }
+  };
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    const family = node.fontName.family;
+    const style = getFontStyle(weight);
+    await figma.loadFontAsync({ family, style });
+    node.fontName = { family, style };
+    return {
+      id: node.id,
+      name: node.name,
+      fontName: node.fontName,
+      weight: weight
+    };
+  } catch (error) {
+    throw new Error(`Error setting font weight: ${error.message}`);
+  }
+}
+
+async function setLetterSpacing(params) {
+  const { nodeId, letterSpacing, unit = "PIXELS" } = params || {};
+  if (!nodeId || letterSpacing === undefined) {
+    throw new Error("Missing nodeId or letterSpacing");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.letterSpacing = { value: letterSpacing, unit };
+    return {
+      id: node.id,
+      name: node.name,
+      letterSpacing: node.letterSpacing
+    };
+  } catch (error) {
+    throw new Error(`Error setting letter spacing: ${error.message}`);
+  }
+}
+
+async function setLineHeight(params) {
+  const { nodeId, lineHeight, unit = "PIXELS" } = params || {};
+  if (!nodeId || lineHeight === undefined) {
+    throw new Error("Missing nodeId or lineHeight");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.lineHeight = { value: lineHeight, unit };
+    return {
+      id: node.id,
+      name: node.name,
+      lineHeight: node.lineHeight
+    };
+  } catch (error) {
+    throw new Error(`Error setting line height: ${error.message}`);
+  }
+}
+
+async function setParagraphSpacing(params) {
+  const { nodeId, paragraphSpacing } = params || {};
+  if (!nodeId || paragraphSpacing === undefined) {
+    throw new Error("Missing nodeId or paragraphSpacing");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.paragraphSpacing = paragraphSpacing;
+    return {
+      id: node.id,
+      name: node.name,
+      paragraphSpacing: node.paragraphSpacing
+    };
+  } catch (error) {
+    throw new Error(`Error setting paragraph spacing: ${error.message}`);
+  }
+}
+
+async function setTextCase(params) {
+  const { nodeId, textCase } = params || {};
+  if (!nodeId || textCase === undefined) {
+    throw new Error("Missing nodeId or textCase");
+  }
+  
+  // Valid textCase values: "ORIGINAL", "UPPER", "LOWER", "TITLE"
+  if (!["ORIGINAL", "UPPER", "LOWER", "TITLE"].includes(textCase)) {
+    throw new Error("Invalid textCase value. Must be one of: ORIGINAL, UPPER, LOWER, TITLE");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.textCase = textCase;
+    return {
+      id: node.id,
+      name: node.name,
+      textCase: node.textCase
+    };
+  } catch (error) {
+    throw new Error(`Error setting text case: ${error.message}`);
+  }
+}
+
+async function setTextDecoration(params) {
+  const { nodeId, textDecoration } = params || {};
+  if (!nodeId || textDecoration === undefined) {
+    throw new Error("Missing nodeId or textDecoration");
+  }
+  
+  // Valid textDecoration values: "NONE", "UNDERLINE", "STRIKETHROUGH"
+  if (!["NONE", "UNDERLINE", "STRIKETHROUGH"].includes(textDecoration)) {
+    throw new Error("Invalid textDecoration value. Must be one of: NONE, UNDERLINE, STRIKETHROUGH");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.textDecoration = textDecoration;
+    return {
+      id: node.id,
+      name: node.name,
+      textDecoration: node.textDecoration
+    };
+  } catch (error) {
+    throw new Error(`Error setting text decoration: ${error.message}`);
+  }
+}
+
+async function getStyledTextSegments(params) {
+  const { nodeId, property } = params || {};
+  if (!nodeId || !property) {
+    throw new Error("Missing nodeId or property");
+  }
+  
+  // Valid properties: "fillStyleId", "fontName", "fontSize", "textCase", 
+  // "textDecoration", "textStyleId", "fills", "letterSpacing", "lineHeight", "fontWeight"
+  const validProperties = [
+    "fillStyleId", "fontName", "fontSize", "textCase", 
+    "textDecoration", "textStyleId", "fills", "letterSpacing", 
+    "lineHeight", "fontWeight"
+  ];
+  
+  if (!validProperties.includes(property)) {
+    throw new Error(`Invalid property. Must be one of: ${validProperties.join(", ")}`);
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    const segments = node.getStyledTextSegments([property]);
+    
+    // Prepare segments data in a format safe for serialization
+    const safeSegments = segments.map(segment => {
+      const safeSegment = {
+        characters: segment.characters,
+        start: segment.start,
+        end: segment.end
+      };
+      
+      // Handle different property types for safe serialization
+      if (property === "fontName") {
+        if (segment[property] && typeof segment[property] === "object") {
+          safeSegment[property] = {
+            family: segment[property].family || "",
+            style: segment[property].style || ""
+          };
+        } else {
+          safeSegment[property] = { family: "", style: "" };
+        }
+      } else if (property === "letterSpacing" || property === "lineHeight") {
+        // Handle spacing properties which have a value and unit
+        if (segment[property] && typeof segment[property] === "object") {
+          safeSegment[property] = {
+            value: segment[property].value || 0,
+            unit: segment[property].unit || "PIXELS"
+          };
+        } else {
+          safeSegment[property] = { value: 0, unit: "PIXELS" };
+        }
+      } else if (property === "fills") {
+        // Handle fills which can be complex
+        safeSegment[property] = segment[property] ? JSON.parse(JSON.stringify(segment[property])) : [];
+      } else {
+        // Handle simple properties
+        safeSegment[property] = segment[property];
+      }
+      
+      return safeSegment;
+    });
+    
+    return {
+      id: node.id,
+      name: node.name,
+      property: property,
+      segments: safeSegments
+    };
+  } catch (error) {
+    throw new Error(`Error getting styled text segments: ${error.message}`);
+  }
+}
+
+async function loadFontAsyncWrapper(params) {
+  const { family, style = "Regular" } = params || {};
+  if (!family) {
+    throw new Error("Missing font family");
+  }
+  
+  try {
+    await figma.loadFontAsync({ family, style });
+    return {
+      success: true,
+      family: family,
+      style: style,
+      message: `Successfully loaded ${family} ${style}`
+    };
+  } catch (error) {
+    throw new Error(`Error loading font: ${error.message}`);
+  }
+}
+
+async function getRemoteComponents() {
+  try {
+    // Check if figma.teamLibrary is available
+    if (!figma.teamLibrary) {
+      console.error("Error: figma.teamLibrary API is not available");
+      return {
+        error: true,
+        message: "The figma.teamLibrary API is not available in this context",
+        apiAvailable: false
+      };
+    }
+    
+    // Check if figma.teamLibrary.getAvailableComponentsAsync exists
+    if (!figma.teamLibrary.getAvailableComponentsAsync) {
+      console.error("Error: figma.teamLibrary.getAvailableComponentsAsync is not available");
+      return {
+        error: true,
+        message: "The getAvailableComponentsAsync method is not available",
+        apiAvailable: false
+      };
+    }
+    
+    console.log("Starting remote components retrieval...");
+    
+    // Set up a manual timeout to detect deadlocks
+    let timeoutId;
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error("Internal timeout while retrieving remote components (15s)"));
+      }, 15000); // 15 seconds internal timeout
+    });
+    
+    // Execute the request with a manual timeout
+    const fetchPromise = figma.teamLibrary.getAvailableComponentsAsync();
+    
+    // Use Promise.race to implement the timeout
+    const teamComponents = await Promise.race([fetchPromise, timeoutPromise])
+      .finally(() => {
+        clearTimeout(timeoutId); // Clear the timeout
+      });
+    
+    console.log(`Retrieved ${teamComponents.length} remote components`);
+    
+    return {
+      success: true,
+      count: teamComponents.length,
+      components: teamComponents.map(component => ({
+        key: component.key,
+        name: component.name,
+        description: component.description || "",
+        libraryName: component.libraryName
+      }))
+    };
+  } catch (error) {
+    console.error(`Detailed error retrieving remote components: ${error.message || "Unknown error"}`);
+    console.error(`Stack trace: ${error.stack || "Not available"}`);
+    
+    return {
+      error: true,
+      message: `Error retrieving remote components: ${error.message}`,
+      stack: error.stack,
+      apiAvailable: true,
+      methodExists: true
+    };
+  }
 }

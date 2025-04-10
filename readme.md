@@ -8,9 +8,11 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
 
 - **Native Claude Integration**: Allows Claude to communicate with Figma through the Model Context Protocol (MCP)
 - **Powerful Commands**: Manipulate objects in Figma, get information, create and modify elements
+- **Advanced Text & Font Control**: Comprehensive text styling capabilities including font selection, spacing, and text effects
 - **Bidirectional Communication**: Real-time WebSocket channel between Claude and Figma
 - **Fluid Experience**: Design with AI as your assistant, accelerating creative workflows
 - **Text Scanning**: Identify and manipulate text nodes within Figma documents
+- **Remote Components**: Access and utilize components from team libraries
 
 ## 📋 Prerequisites
 
@@ -120,6 +122,7 @@ Once installed, you just need to start it:
 
 As Claude is connected to our MCP, it already knows the list of tools to manipulate Figma. But if you want, you can mention them in your prompts:  
 
+### Basic Commands
 - `clone_node`  
   Clone an existing node in Figma
 - `create_component_instance`  
@@ -167,7 +170,38 @@ As Claude is connected to our MCP, it already knows the list of tools to manipul
 - `set_text_content`  
   Set the text content of an existing text node in Figma
 
+### Text and Font Commands
+- `set_font_name`  
+  Set the font name and style of a text node in Figma (e.g., "Arial", "Bold")
+- `set_font_size`  
+  Set the font size of a text node in Figma (in pixels)
+- `set_font_weight`  
+  Set the font weight of a text node in Figma (100-900)
+- `set_letter_spacing`  
+  Set the letter spacing of a text node in Figma (in pixels or percentage)
+- `set_line_height`  
+  Set the line height of a text node in Figma (in pixels, percentage, or auto)
+- `set_paragraph_spacing`  
+  Set the paragraph spacing of a text node in Figma (in pixels)
+- `set_text_case`  
+  Set the text case of a text node in Figma (ORIGINAL, UPPER, LOWER, TITLE)
+- `set_text_decoration`  
+  Set the text decoration of a text node in Figma (NONE, UNDERLINE, STRIKETHROUGH)
+- `get_styled_text_segments`  
+  Get text segments with specific styling in a text node (by fontName, fontSize, etc.)
+- `load_font_async`  
+  Load a font asynchronously in Figma
+- `get_remote_components`  
+  Get available components from team libraries in Figma
+
 ## 📝 CHANGELOG
+
+### 0.4.0
+- Added advanced text and font manipulation capabilities
+- New commands for controlling typography: font styles, spacing, text case, and more
+- Added support for accessing team library components
+- Improved error handling and timeout management
+- Enhanced text scanning capabilities
 
 ### 0.3.0
 - Added `set_auto_layout` command to configure auto layout properties for frames and groups
@@ -187,6 +221,8 @@ If you encounter problems, check the following common issues:
 - **Claude Can't Find the MCP**: Make sure you've run `bun run configure-claude` and restarted Claude Desktop
 - **Claude Not Responding**: Confirm you've selected "ClaudeTalkToFigma" in the MCPs menu
 - **Execution Errors**: Check the Figma development console for detailed messages
+- **Font Loading Issues**: Some fonts might not be available in Figma. Use `load_font_async` to verify font availability
+- **Remote Components Error**: Team libraries might require proper permissions in Figma. Ensure you have access to the libraries you're trying to use
 
 ## 🧪 Testing
 
@@ -222,4 +258,4 @@ This project is under the MIT License - see the [LICENSE](LICENSE) file for deta
 - Anthropic team for Claude and the Model Context Protocol
 - Figma community for their excellent plugin API
 - Sonny Lazuardi for the original Cursor Talk to Figma MCP implementation
-- Bun team for providing a fast JavaScript runtime 
+- Bun team for providing a fast JavaScript runtime
