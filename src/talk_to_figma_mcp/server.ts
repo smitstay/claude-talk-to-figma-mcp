@@ -1852,6 +1852,100 @@ server.tool(
   }
 );
 
+// Set Effects Tool
+server.tool(
+  "set_effects",
+  "Set the visual effects of a node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the node to modify"),
+    effects: z.array(
+      z.object({
+        type: z.enum(["DROP_SHADOW", "INNER_SHADOW", "LAYER_BLUR", "BACKGROUND_BLUR"]).describe("Effect type"),
+        color: z.object({
+          r: z.number().min(0).max(1).describe("Red (0-1)"),
+          g: z.number().min(0).max(1).describe("Green (0-1)"),
+          b: z.number().min(0).max(1).describe("Blue (0-1)"),
+          a: z.number().min(0).max(1).describe("Alpha (0-1)")
+        }).optional().describe("Effect color (for shadows)"),
+        offset: z.object({
+          x: z.number().describe("X offset"),
+          y: z.number().describe("Y offset")
+        }).optional().describe("Offset (for shadows)"),
+        radius: z.number().optional().describe("Effect radius"),
+        spread: z.number().optional().describe("Shadow spread (for shadows)"),
+        visible: z.boolean().optional().describe("Whether the effect is visible"),
+        blendMode: z.string().optional().describe("Blend mode")
+      })
+    ).describe("Array of effects to apply")
+  },
+  async ({ nodeId, effects }) => {
+    try {
+      const result = await sendCommandToFigma("set_effects", {
+        nodeId,
+        effects
+      });
+      
+      const typedResult = result as { name: string, effects: any[] };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Successfully applied ${effects.length} effect(s) to node "${typedResult.name}"`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting effects: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Effect Style ID Tool
+server.tool(
+  "set_effect_style_id",
+  "Apply an effect style to a node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the node to modify"),
+    effectStyleId: z.string().describe("The ID of the effect style to apply")
+  },
+  async ({ nodeId, effectStyleId }) => {
+    try {
+      const result = await sendCommandToFigma("set_effect_style_id", {
+        nodeId,
+        effectStyleId
+      });
+      
+      const typedResult = result as { name: string, effectStyleId: string };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Successfully applied effect style to node "${typedResult.name}"`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting effect style: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
 // Define command types and parameters
 type FigmaCommand =
   | "get_document_info"
@@ -1887,7 +1981,9 @@ type FigmaCommand =
   | "set_text_decoration"
   | "get_styled_text_segments"
   | "load_font_async"
-  | "get_remote_components";
+  | "get_remote_components"
+  | "set_effects"
+  | "set_effect_style_id";
 
 // Helper function to process Figma node responses
 function processFigmaNodeResponse(result: unknown): any {
