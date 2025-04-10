@@ -505,6 +505,213 @@ server.tool(
   }
 );
 
+// Create Ellipse Tool
+server.tool(
+  "create_ellipse",
+  "Create a new ellipse in Figma",
+  {
+    x: z.number().describe("X position"),
+    y: z.number().describe("Y position"),
+    width: z.number().describe("Width of the ellipse"),
+    height: z.number().describe("Height of the ellipse"),
+    name: z.string().optional().describe("Optional name for the ellipse"),
+    parentId: z.string().optional().describe("Optional parent node ID to append the ellipse to"),
+    fillColor: z
+      .object({
+        r: z.number().min(0).max(1).describe("Red component (0-1)"),
+        g: z.number().min(0).max(1).describe("Green component (0-1)"),
+        b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+        a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
+      })
+      .optional()
+      .describe("Fill color in RGBA format"),
+    strokeColor: z
+      .object({
+        r: z.number().min(0).max(1).describe("Red component (0-1)"),
+        g: z.number().min(0).max(1).describe("Green component (0-1)"),
+        b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+        a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
+      })
+      .optional()
+      .describe("Stroke color in RGBA format"),
+    strokeWeight: z.number().positive().optional().describe("Stroke weight"),
+  },
+  async ({ x, y, width, height, name, parentId, fillColor, strokeColor, strokeWeight }) => {
+    try {
+      const result = await sendCommandToFigma("create_ellipse", {
+        x,
+        y,
+        width,
+        height,
+        name: name || "Ellipse",
+        parentId,
+        fillColor,
+        strokeColor,
+        strokeWeight,
+      });
+      
+      const typedResult = result as { id: string, name: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Created ellipse with ID: ${typedResult.id}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error creating ellipse: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Create Polygon Tool
+server.tool(
+  "create_polygon",
+  "Create a new polygon in Figma",
+  {
+    x: z.number().describe("X position"),
+    y: z.number().describe("Y position"),
+    width: z.number().describe("Width of the polygon"),
+    height: z.number().describe("Height of the polygon"),
+    sides: z.number().min(3).optional().describe("Number of sides (default: 6)"),
+    name: z.string().optional().describe("Optional name for the polygon"),
+    parentId: z.string().optional().describe("Optional parent node ID to append the polygon to"),
+    fillColor: z
+      .object({
+        r: z.number().min(0).max(1).describe("Red component (0-1)"),
+        g: z.number().min(0).max(1).describe("Green component (0-1)"),
+        b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+        a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
+      })
+      .optional()
+      .describe("Fill color in RGBA format"),
+    strokeColor: z
+      .object({
+        r: z.number().min(0).max(1).describe("Red component (0-1)"),
+        g: z.number().min(0).max(1).describe("Green component (0-1)"),
+        b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+        a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
+      })
+      .optional()
+      .describe("Stroke color in RGBA format"),
+    strokeWeight: z.number().positive().optional().describe("Stroke weight"),
+  },
+  async ({ x, y, width, height, sides, name, parentId, fillColor, strokeColor, strokeWeight }) => {
+    try {
+      const result = await sendCommandToFigma("create_polygon", {
+        x,
+        y,
+        width,
+        height,
+        sides: sides || 6,
+        name: name || "Polygon",
+        parentId,
+        fillColor,
+        strokeColor,
+        strokeWeight,
+      });
+      
+      const typedResult = result as { id: string, name: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Created polygon with ID: ${typedResult.id} and ${sides || 6} sides`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error creating polygon: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Create Star Tool
+server.tool(
+  "create_star",
+  "Create a new star in Figma",
+  {
+    x: z.number().describe("X position"),
+    y: z.number().describe("Y position"),
+    width: z.number().describe("Width of the star"),
+    height: z.number().describe("Height of the star"),
+    points: z.number().min(3).optional().describe("Number of points (default: 5)"),
+    innerRadius: z.number().min(0.01).max(0.99).optional().describe("Inner radius ratio (0.01-0.99, default: 0.5)"),
+    name: z.string().optional().describe("Optional name for the star"),
+    parentId: z.string().optional().describe("Optional parent node ID to append the star to"),
+    fillColor: z
+      .object({
+        r: z.number().min(0).max(1).describe("Red component (0-1)"),
+        g: z.number().min(0).max(1).describe("Green component (0-1)"),
+        b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+        a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
+      })
+      .optional()
+      .describe("Fill color in RGBA format"),
+    strokeColor: z
+      .object({
+        r: z.number().min(0).max(1).describe("Red component (0-1)"),
+        g: z.number().min(0).max(1).describe("Green component (0-1)"),
+        b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+        a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
+      })
+      .optional()
+      .describe("Stroke color in RGBA format"),
+    strokeWeight: z.number().positive().optional().describe("Stroke weight"),
+  },
+  async ({ x, y, width, height, points, innerRadius, name, parentId, fillColor, strokeColor, strokeWeight }) => {
+    try {
+      const result = await sendCommandToFigma("create_star", {
+        x,
+        y,
+        width,
+        height,
+        points: points || 5,
+        innerRadius: innerRadius || 0.5,
+        name: name || "Star",
+        parentId,
+        fillColor,
+        strokeColor,
+        strokeWeight,
+      });
+      
+      const typedResult = result as { id: string, name: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Created star with ID: ${typedResult.id}, ${points || 5} points, and inner radius ratio of ${innerRadius || 0.5}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error creating star: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
 // Set Fill Color Tool
 server.tool(
   "set_fill_color",
@@ -2118,6 +2325,11 @@ type FigmaCommand =
   | "create_rectangle"
   | "create_frame"
   | "create_text"
+  | "create_ellipse"
+  | "create_polygon"
+  | "create_star"
+  | "create_vector"
+  | "create_line"
   | "set_fill_color"
   | "set_stroke_color"
   | "move_node"

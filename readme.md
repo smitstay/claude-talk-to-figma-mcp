@@ -127,12 +127,22 @@ As Claude is connected to our MCP, it already knows the list of tools to manipul
   Clone an existing node in Figma
 - `create_component_instance`  
   Create an instance of a component in Figma
+- `create_ellipse`  
+  Create a new ellipse or circle in Figma
 - `create_frame`  
   Create a new frame in Figma
+- `create_line`  
+  Create a new line in Figma
+- `create_polygon`  
+  Create a new polygon with customizable sides in Figma
 - `create_rectangle`  
   Create a new rectangle in Figma
+- `create_star`  
+  Create a new star with customizable points in Figma
 - `create_text`  
   Create a new text element in Figma
+- `create_vector`  
+  Create a new vector shape in Figma
 - `delete_node`  
   Delete a node from Figma
 - `export_node_as_image`  
@@ -196,14 +206,19 @@ As Claude is connected to our MCP, it already knows the list of tools to manipul
 
 ## 📝 CHANGELOG
 
-### 0.4.0
+### 0.3.0
+- Added new tools for creating advanced shapes:
+  - `create_ellipse`: Creation of ellipses and circles
+  - `create_polygon`: Creation of polygons with customizable sides
+  - `create_star`: Creation of stars with customizable points and inner radius
+  - `create_vector`: Creation of complex vector shapes
+  - `create_line`: Creation of straight lines
+- Improvements in documentation and usage examples
 - Added advanced text and font manipulation capabilities
 - New commands for controlling typography: font styles, spacing, text case, and more
 - Added support for accessing team library components
 - Improved error handling and timeout management
 - Enhanced text scanning capabilities
-
-### 0.3.0
 - Added `set_auto_layout` command to configure auto layout properties for frames and groups
 - Supports settings for layout direction, padding, item spacing, alignment and more
 
