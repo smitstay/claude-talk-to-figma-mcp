@@ -162,8 +162,19 @@ As Claude is connected to our MCP, it already knows the list of tools to manipul
   Set multiple text contents parallelly in a node
 - `set_stroke_color`  
   Set the stroke color of a node in Figma
+- `set_auto_layout`  
+  Configure auto layout properties for a node in Figma
 - `set_text_content`  
   Set the text content of an existing text node in Figma
+
+## 📝 CHANGELOG
+
+### 0.3.0
+- Added `set_auto_layout` command to configure auto layout properties for frames and groups
+- Supports settings for layout direction, padding, item spacing, alignment and more
+
+### 0.2.0
+- Initial public release with Claude Desktop support
 
 ## 🐛 Troubleshooting
 
