@@ -1010,6 +1010,412 @@ server.tool(
   }
 );
 
+// Set Font Name Tool
+server.tool(
+  "set_font_name",
+  "Set the font name and style of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    family: z.string().describe("Font family name"),
+    style: z.string().optional().describe("Font style (e.g., 'Regular', 'Bold', 'Italic')"),
+  },
+  async ({ nodeId, family, style }) => {
+    try {
+      const result = await sendCommandToFigma("set_font_name", {
+        nodeId,
+        family,
+        style
+      });
+      const typedResult = result as { name: string, fontName: { family: string, style: string } };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated font of node "${typedResult.name}" to ${typedResult.fontName.family} ${typedResult.fontName.style}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting font name: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Font Size Tool
+server.tool(
+  "set_font_size",
+  "Set the font size of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    fontSize: z.number().positive().describe("Font size in pixels"),
+  },
+  async ({ nodeId, fontSize }) => {
+    try {
+      const result = await sendCommandToFigma("set_font_size", {
+        nodeId,
+        fontSize
+      });
+      const typedResult = result as { name: string, fontSize: number };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated font size of node "${typedResult.name}" to ${typedResult.fontSize}px`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting font size: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Font Weight Tool
+server.tool(
+  "set_font_weight",
+  "Set the font weight of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    weight: z.number().describe("Font weight (100, 200, 300, 400, 500, 600, 700, 800, 900)"),
+  },
+  async ({ nodeId, weight }) => {
+    try {
+      const result = await sendCommandToFigma("set_font_weight", {
+        nodeId,
+        weight
+      });
+      const typedResult = result as { name: string, fontName: { family: string, style: string }, weight: number };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated font weight of node "${typedResult.name}" to ${typedResult.weight} (${typedResult.fontName.style})`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting font weight: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Letter Spacing Tool
+server.tool(
+  "set_letter_spacing",
+  "Set the letter spacing of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    letterSpacing: z.number().describe("Letter spacing value"),
+    unit: z.enum(["PIXELS", "PERCENT"]).optional().describe("Unit type (PIXELS or PERCENT)"),
+  },
+  async ({ nodeId, letterSpacing, unit }) => {
+    try {
+      const result = await sendCommandToFigma("set_letter_spacing", {
+        nodeId,
+        letterSpacing,
+        unit: unit || "PIXELS"
+      });
+      const typedResult = result as { name: string, letterSpacing: { value: number, unit: string } };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated letter spacing of node "${typedResult.name}" to ${typedResult.letterSpacing.value} ${typedResult.letterSpacing.unit}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting letter spacing: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Line Height Tool
+server.tool(
+  "set_line_height",
+  "Set the line height of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    lineHeight: z.number().describe("Line height value"),
+    unit: z.enum(["PIXELS", "PERCENT", "AUTO"]).optional().describe("Unit type (PIXELS, PERCENT, or AUTO)"),
+  },
+  async ({ nodeId, lineHeight, unit }) => {
+    try {
+      const result = await sendCommandToFigma("set_line_height", {
+        nodeId,
+        lineHeight,
+        unit: unit || "PIXELS"
+      });
+      const typedResult = result as { name: string, lineHeight: { value: number, unit: string } };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated line height of node "${typedResult.name}" to ${typedResult.lineHeight.value} ${typedResult.lineHeight.unit}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting line height: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Paragraph Spacing Tool
+server.tool(
+  "set_paragraph_spacing",
+  "Set the paragraph spacing of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    paragraphSpacing: z.number().describe("Paragraph spacing value in pixels"),
+  },
+  async ({ nodeId, paragraphSpacing }) => {
+    try {
+      const result = await sendCommandToFigma("set_paragraph_spacing", {
+        nodeId,
+        paragraphSpacing
+      });
+      const typedResult = result as { name: string, paragraphSpacing: number };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated paragraph spacing of node "${typedResult.name}" to ${typedResult.paragraphSpacing}px`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting paragraph spacing: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Text Case Tool
+server.tool(
+  "set_text_case",
+  "Set the text case of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    textCase: z.enum(["ORIGINAL", "UPPER", "LOWER", "TITLE"]).describe("Text case type"),
+  },
+  async ({ nodeId, textCase }) => {
+    try {
+      const result = await sendCommandToFigma("set_text_case", {
+        nodeId,
+        textCase
+      });
+      const typedResult = result as { name: string, textCase: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated text case of node "${typedResult.name}" to ${typedResult.textCase}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting text case: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Text Decoration Tool
+server.tool(
+  "set_text_decoration",
+  "Set the text decoration of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    textDecoration: z.enum(["NONE", "UNDERLINE", "STRIKETHROUGH"]).describe("Text decoration type"),
+  },
+  async ({ nodeId, textDecoration }) => {
+    try {
+      const result = await sendCommandToFigma("set_text_decoration", {
+        nodeId,
+        textDecoration
+      });
+      const typedResult = result as { name: string, textDecoration: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated text decoration of node "${typedResult.name}" to ${typedResult.textDecoration}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting text decoration: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Get Styled Text Segments Tool
+server.tool(
+  "get_styled_text_segments",
+  "Get text segments with specific styling in a text node",
+  {
+    nodeId: z.string().describe("The ID of the text node to analyze"),
+    property: z.enum([
+      "fillStyleId", 
+      "fontName", 
+      "fontSize", 
+      "textCase", 
+      "textDecoration", 
+      "textStyleId", 
+      "fills", 
+      "letterSpacing", 
+      "lineHeight", 
+      "fontWeight"
+    ]).describe("The style property to analyze segments by"),
+  },
+  async ({ nodeId, property }) => {
+    try {
+      const result = await sendCommandToFigma("get_styled_text_segments", {
+        nodeId,
+        property
+      });
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2)
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error getting styled text segments: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Load Font Async Tool
+server.tool(
+  "load_font_async",
+  "Load a font asynchronously in Figma",
+  {
+    family: z.string().describe("Font family name"),
+    style: z.string().optional().describe("Font style (e.g., 'Regular', 'Bold', 'Italic')"),
+  },
+  async ({ family, style }) => {
+    try {
+      const result = await sendCommandToFigma("load_font_async", {
+        family,
+        style: style || "Regular"
+      });
+      const typedResult = result as { success: boolean, family: string, style: string, message: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: typedResult.message || `Loaded font ${family} ${style || "Regular"}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error loading font: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Get Remote Components Tool
+server.tool(
+  "get_remote_components",
+  "Get available components from team libraries in Figma",
+  {},
+  async () => {
+    try {
+      const result = await sendCommandToFigma("get_remote_components");
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2)
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error getting remote components: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
 // Define design strategy prompt
 server.prompt(
   "design_strategy",
@@ -1470,7 +1876,18 @@ type FigmaCommand =
   | "set_text_content"
   | "scan_text_nodes"
   | "set_multiple_text_contents"
-  | "set_auto_layout";
+  | "set_auto_layout"
+  | "set_font_name"
+  | "set_font_size"
+  | "set_font_weight"
+  | "set_letter_spacing"
+  | "set_line_height"
+  | "set_paragraph_spacing"
+  | "set_text_case"
+  | "set_text_decoration"
+  | "get_styled_text_segments"
+  | "load_font_async"
+  | "get_remote_components";
 
 // Helper function to process Figma node responses
 function processFigmaNodeResponse(result: unknown): any {
