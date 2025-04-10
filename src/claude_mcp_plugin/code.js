@@ -171,6 +171,14 @@ async function handleCommand(command, params) {
       return await setEffects(params);
     case "set_effect_style_id":
       return await setEffectStyleId(params);
+    case "group_nodes":
+      return await groupNodes(params);
+    case "ungroup_nodes":
+      return await ungroupNodes(params);
+    case "flatten_node":
+      return await flattenNode(params);
+    case "insert_child":
+      return await insertChild(params);
     default:
       throw new Error(`Unknown command: ${command}`);
   }
@@ -2514,5 +2522,183 @@ async function setEffectStyleId(params) {
     };
   } catch (error) {
     throw new Error(`Error setting effect style ID: ${error.message}`);
+  }
+}
+
+// Function to group nodes
+async function groupNodes(params) {
+  const { nodeIds, name } = params || {};
+  
+  if (!nodeIds || !Array.isArray(nodeIds) || nodeIds.length < 2) {
+    throw new Error("Must provide at least two nodeIds to group");
+  }
+  
+  try {
+    // Get all nodes to be grouped
+    const nodesToGroup = [];
+    for (const nodeId of nodeIds) {
+      const node = await figma.getNodeByIdAsync(nodeId);
+      if (!node) {
+        throw new Error(`Node not found with ID: ${nodeId}`);
+      }
+      nodesToGroup.push(node);
+    }
+    
+    // Verify that all nodes have the same parent
+    const parent = nodesToGroup[0].parent;
+    for (const node of nodesToGroup) {
+      if (node.parent !== parent) {
+        throw new Error("All nodes must have the same parent to be grouped");
+      }
+    }
+    
+    // Create a group and add the nodes to it
+    const group = figma.group(nodesToGroup, parent);
+    
+    // Optionally set a name for the group
+    if (name) {
+      group.name = name;
+    }
+    
+    return {
+      id: group.id,
+      name: group.name,
+      type: group.type,
+      children: group.children.map(child => ({ id: child.id, name: child.name, type: child.type }))
+    };
+  } catch (error) {
+    throw new Error(`Error grouping nodes: ${error.message}`);
+  }
+}
+
+// Function to ungroup nodes
+async function ungroupNodes(params) {
+  const { nodeId } = params || {};
+  
+  if (!nodeId) {
+    throw new Error("Missing nodeId parameter");
+  }
+  
+  try {
+    const node = await figma.getNodeByIdAsync(nodeId);
+    if (!node) {
+      throw new Error(`Node not found with ID: ${nodeId}`);
+    }
+    
+    // Verify that the node is a group or a frame
+    if (node.type !== "GROUP" && node.type !== "FRAME") {
+      throw new Error(`Node with ID ${nodeId} is not a GROUP or FRAME`);
+    }
+    
+    // Get the parent and children before ungrouping
+    const parent = node.parent;
+    const children = [...node.children];
+    
+    // Ungroup the node
+    const ungroupedItems = figma.ungroup(node);
+    
+    return {
+      success: true,
+      ungroupedCount: ungroupedItems.length,
+      items: ungroupedItems.map(item => ({ id: item.id, name: item.name, type: item.type }))
+    };
+  } catch (error) {
+    throw new Error(`Error ungrouping node: ${error.message}`);
+  }
+}
+
+// Function to flatten nodes (e.g., boolean operations, convert to path)
+async function flattenNode(params) {
+  const { nodeId } = params || {};
+  
+  if (!nodeId) {
+    throw new Error("Missing nodeId parameter");
+  }
+  
+  try {
+    const node = await figma.getNodeByIdAsync(nodeId);
+    if (!node) {
+      throw new Error(`Node not found with ID: ${nodeId}`);
+    }
+    
+    // Check for specific node types that can be flattened
+    // Only certain node types like VECTOR, BOOLEAN_OPERATION, or STAR can be flattened
+    const flattenableTypes = ["VECTOR", "BOOLEAN_OPERATION", "STAR", "POLYGON", "ELLIPSE", "RECTANGLE"];
+    
+    if (!flattenableTypes.includes(node.type)) {
+      throw new Error(`Node with ID ${nodeId} and type ${node.type} cannot be flattened. Only vector-based nodes can be flattened.`);
+    }
+    
+    // Verify the node has the flatten method before calling it
+    if (typeof node.flatten !== 'function') {
+      throw new Error(`Node with ID ${nodeId} does not support the flatten operation.`);
+    }
+    
+    // Flatten the node
+    const flattened = node.flatten();
+    
+    return {
+      id: flattened.id,
+      name: flattened.name,
+      type: flattened.type
+    };
+  } catch (error) {
+    console.error(`Error in flattenNode: ${error.message}`);
+    throw new Error(`Error flattening node: ${error.message}`);
+  }
+}
+
+// Function to insert a child into a parent node
+async function insertChild(params) {
+  const { parentId, childId, index } = params || {};
+  
+  if (!parentId) {
+    throw new Error("Missing parentId parameter");
+  }
+  
+  if (!childId) {
+    throw new Error("Missing childId parameter");
+  }
+  
+  try {
+    // Get the parent and child nodes
+    const parent = await figma.getNodeByIdAsync(parentId);
+    if (!parent) {
+      throw new Error(`Parent node not found with ID: ${parentId}`);
+    }
+    
+    const child = await figma.getNodeByIdAsync(childId);
+    if (!child) {
+      throw new Error(`Child node not found with ID: ${childId}`);
+    }
+    
+    // Check if the parent can have children
+    if (!("appendChild" in parent)) {
+      throw new Error(`Parent node with ID ${parentId} cannot have children`);
+    }
+    
+    // Save child's current parent for proper handling
+    const originalParent = child.parent;
+    
+    // Insert the child at the specified index or append it
+    if (index !== undefined && index >= 0 && index <= parent.children.length) {
+      parent.insertChild(index, child);
+    } else {
+      parent.appendChild(child);
+    }
+    
+    // Verify that the insertion worked
+    const newIndex = parent.children.indexOf(child);
+    
+    return {
+      parentId: parent.id,
+      childId: child.id,
+      index: newIndex,
+      success: newIndex !== -1,
+      previousParentId: originalParent ? originalParent.id : null
+    };
+  } catch (error) {
+    console.error(`Error inserting child: ${error.message}`, error);
+    throw new Error(`Error inserting child: ${error.message}`);
   }
 }
