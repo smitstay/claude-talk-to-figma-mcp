@@ -206,7 +206,7 @@ As Claude is connected to our MCP, it already knows the list of tools to manipul
 
 ## 📝 CHANGELOG
 
-### 0.3.0
+### 0.4.0
 - Added new tools for creating advanced shapes:
   - `create_ellipse`: Creation of ellipses and circles
   - `create_polygon`: Creation of polygons with customizable sides
@@ -219,6 +219,8 @@ As Claude is connected to our MCP, it already knows the list of tools to manipul
 - Added support for accessing team library components
 - Improved error handling and timeout management
 - Enhanced text scanning capabilities
+
+### 0.3.0
 - Added `set_auto_layout` command to configure auto layout properties for frames and groups
 - Supports settings for layout direction, padding, item spacing, alignment and more
 
