@@ -1946,6 +1946,170 @@ server.tool(
   }
 );
 
+// Group Nodes Tool
+server.tool(
+  "group_nodes",
+  "Group nodes in Figma",
+  {
+    nodeIds: z.array(z.string()).describe("Array of IDs of the nodes to group"),
+    name: z.string().optional().describe("Optional name for the group")
+  },
+  async ({ nodeIds, name }) => {
+    try {
+      const result = await sendCommandToFigma("group_nodes", { 
+        nodeIds, 
+        name 
+      });
+      
+      const typedResult = result as { 
+        id: string, 
+        name: string, 
+        type: string, 
+        children: Array<{ id: string, name: string, type: string }> 
+      };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Nodes successfully grouped into "${typedResult.name}" with ID: ${typedResult.id}. The group contains ${typedResult.children.length} elements.`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error grouping nodes: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Ungroup Nodes Tool
+server.tool(
+  "ungroup_nodes",
+  "Ungroup nodes in Figma",
+  {
+    nodeId: z.string().describe("ID of the node (group or frame) to ungroup"),
+  },
+  async ({ nodeId }) => {
+    try {
+      const result = await sendCommandToFigma("ungroup_nodes", { nodeId });
+      
+      const typedResult = result as { 
+        success: boolean, 
+        ungroupedCount: number, 
+        items: Array<{ id: string, name: string, type: string }> 
+      };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Node successfully ungrouped. ${typedResult.ungroupedCount} elements were released.`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error ungrouping node: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Flatten Node Tool
+server.tool(
+  "flatten_node",
+  "Flatten a node in Figma (e.g., for boolean operations or converting to path)",
+  {
+    nodeId: z.string().describe("ID of the node to flatten"),
+  },
+  async ({ nodeId }) => {
+    try {
+      const result = await sendCommandToFigma("flatten_node", { nodeId });
+      
+      const typedResult = result as { 
+        id: string, 
+        name: string, 
+        type: string 
+      };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Node "${typedResult.name}" flattened successfully. The new node has ID: ${typedResult.id} and is of type ${typedResult.type}.`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error flattening node: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Insert Child Tool
+server.tool(
+  "insert_child",
+  "Insert a child node inside a parent node in Figma",
+  {
+    parentId: z.string().describe("ID of the parent node where the child will be inserted"),
+    childId: z.string().describe("ID of the child node to insert"),
+    index: z.number().optional().describe("Optional index where to insert the child (if not specified, it will be added at the end)")
+  },
+  async ({ parentId, childId, index }) => {
+    try {
+      const result = await sendCommandToFigma("insert_child", { 
+        parentId, 
+        childId,
+        index 
+      });
+      
+      const typedResult = result as { 
+        parentId: string,
+        childId: string,
+        index: number,
+        success: boolean
+      };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Child node with ID: ${typedResult.childId} successfully inserted into parent node with ID: ${typedResult.parentId}${index !== undefined ? ` at position ${typedResult.index}` : ''}.`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error inserting child node: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
 // Define command types and parameters
 type FigmaCommand =
   | "get_document_info"
@@ -1983,7 +2147,11 @@ type FigmaCommand =
   | "load_font_async"
   | "get_remote_components"
   | "set_effects"
-  | "set_effect_style_id";
+  | "set_effect_style_id"
+  | "group_nodes"
+  | "ungroup_nodes"
+  | "flatten_node"
+  | "insert_child";
 
 // Helper function to process Figma node responses
 function processFigmaNodeResponse(result: unknown): any {
