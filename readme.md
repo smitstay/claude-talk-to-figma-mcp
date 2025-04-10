@@ -8,18 +8,20 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
 
 - **Native Claude Integration**: Allows Claude to communicate with Figma through the Model Context Protocol (MCP)
 - **Powerful Commands**: Manipulate objects in Figma, get information, create and modify elements
+- **Advanced Text & Font Control**: Comprehensive text styling capabilities including font selection, spacing, and text effects
 - **Bidirectional Communication**: Real-time WebSocket channel between Claude and Figma
 - **Fluid Experience**: Design with AI as your assistant, accelerating creative workflows
 - **Text Scanning**: Identify and manipulate text nodes within Figma documents
+- **Remote Components**: Access and utilize components from team libraries
 
 ## 📋 Prerequisites
 
 - [Claude Desktop](https://claude.ai/download) installed
+- [Figma Desktop](https://www.figma.com/downloads/) installed
 - [Figma](https://figma.com) account
 - [Bun](https://bun.sh) v1.0.0 or higher 
   - Linux macOS ```curl -fsSL https://bun.sh/install | bash```
   - Windows ```powershell -c "irm bun.sh/install.ps1 | iex"```
-- [Cursor Talk to Figma MCP Plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin) installed in Figma
 
 ## ⚙️ Installation
 
@@ -54,9 +56,17 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
    - Modifies or creates the configuration file to include "ClaudeTalkToFigma" in the list of MCPs
    - Configures the command that Claude Desktop should execute to start the MCP
 
-5. Install the Figma plugin
-   [Cursor Talk to Figma MCP Plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin)
-   > **Note**: This project originally included a custom Figma plugin, but we now use the official plugin from Figma Community which provides the same functionality. The original plugin has been archived in this repository for reference.
+5. Install the Figma plugin:
+   
+   > **Note**: This project uses a custom Figma plugin located in the `src/claude_mcp_plugin` folder.
+
+   a. Create a new plugin in development mode in Figma:
+   - Open Figma
+   - Go to **Menu > Plugins > Development > New Plugin**
+   - Select "Link existing plugin"
+   - Navigate and select the `src/claude_mcp_plugin` folder from this repository
+
+   The plugin will appear in your development plugins list and you can use it like any other plugin.
 
 ## 🚀 Usage
 
@@ -74,7 +84,7 @@ Once installed, you just need to start it:
 
 3. **Connect the plugin to the server**:
 
-   Open the plugin in Figma and enter port 3055. This generates a channel ID, copy it to provide it to Claude.
+   Open the Claude MCP Plugin in Figma and copy the channel ID generated to provide it to Claude.
 
    ![Figma Plugin Configuration](images/mcp-figma-plugin-configuration.png)
 
@@ -112,16 +122,27 @@ Once installed, you just need to start it:
 
 As Claude is connected to our MCP, it already knows the list of tools to manipulate Figma. But if you want, you can mention them in your prompts:  
 
+### Basic Commands
 - `clone_node`  
   Clone an existing node in Figma
 - `create_component_instance`  
   Create an instance of a component in Figma
+- `create_ellipse`  
+  Create a new ellipse or circle in Figma
 - `create_frame`  
   Create a new frame in Figma
+- `create_line`  
+  Create a new line in Figma
+- `create_polygon`  
+  Create a new polygon with customizable sides in Figma
 - `create_rectangle`  
   Create a new rectangle in Figma
+- `create_star`  
+  Create a new star with customizable points in Figma
 - `create_text`  
   Create a new text element in Figma
+- `create_vector`  
+  Create a new vector shape in Figma
 - `delete_node`  
   Delete a node from Figma
 - `export_node_as_image`  
@@ -153,9 +174,58 @@ As Claude is connected to our MCP, it already knows the list of tools to manipul
 - `set_multiple_text_contents`  
   Set multiple text contents parallelly in a node
 - `set_stroke_color`  
-  Set the stroke color of a node in Figmaå
+  Set the stroke color of a node in Figma
+- `set_auto_layout`  
+  Configure auto layout properties for a node in Figma
 - `set_text_content`  
   Set the text content of an existing text node in Figma
+
+### Text and Font Commands
+- `set_font_name`  
+  Set the font name and style of a text node in Figma (e.g., "Arial", "Bold")
+- `set_font_size`  
+  Set the font size of a text node in Figma (in pixels)
+- `set_font_weight`  
+  Set the font weight of a text node in Figma (100-900)
+- `set_letter_spacing`  
+  Set the letter spacing of a text node in Figma (in pixels or percentage)
+- `set_line_height`  
+  Set the line height of a text node in Figma (in pixels, percentage, or auto)
+- `set_paragraph_spacing`  
+  Set the paragraph spacing of a text node in Figma (in pixels)
+- `set_text_case`  
+  Set the text case of a text node in Figma (ORIGINAL, UPPER, LOWER, TITLE)
+- `set_text_decoration`  
+  Set the text decoration of a text node in Figma (NONE, UNDERLINE, STRIKETHROUGH)
+- `get_styled_text_segments`  
+  Get text segments with specific styling in a text node (by fontName, fontSize, etc.)
+- `load_font_async`  
+  Load a font asynchronously in Figma
+- `get_remote_components`  
+  Get available components from team libraries in Figma
+
+## 📝 CHANGELOG
+
+### 0.4.0
+- Added new tools for creating advanced shapes:
+  - `create_ellipse`: Creation of ellipses and circles
+  - `create_polygon`: Creation of polygons with customizable sides
+  - `create_star`: Creation of stars with customizable points and inner radius
+  - `create_vector`: Creation of complex vector shapes
+  - `create_line`: Creation of straight lines
+- Improvements in documentation and usage examples
+- Added advanced text and font manipulation capabilities
+- New commands for controlling typography: font styles, spacing, text case, and more
+- Added support for accessing team library components
+- Improved error handling and timeout management
+- Enhanced text scanning capabilities
+
+### 0.3.0
+- Added `set_auto_layout` command to configure auto layout properties for frames and groups
+- Supports settings for layout direction, padding, item spacing, alignment and more
+
+### 0.2.0
+- Initial public release with Claude Desktop support
 
 ## 🐛 Troubleshooting
 
@@ -163,11 +233,13 @@ If you encounter problems, check the following common issues:
 
 ### Common Issues
 
-- **Connection Error**: Make sure the WebSocket server is running with `npx claude-talk-to-figma-mcp-socket`
-- **Plugin Not Appearing**: Verify that you've correctly installed the plugin from Figma Community
+- **Connection Error**: Make sure the WebSocket server is running with `bun socket`
+- **Plugin Not Appearing**: Verify that you've correctly linked the plugin folder in Figma Development settings
 - **Claude Can't Find the MCP**: Make sure you've run `bun run configure-claude` and restarted Claude Desktop
 - **Claude Not Responding**: Confirm you've selected "ClaudeTalkToFigma" in the MCPs menu
 - **Execution Errors**: Check the Figma development console for detailed messages
+- **Font Loading Issues**: Some fonts might not be available in Figma. Use `load_font_async` to verify font availability
+- **Remote Components Error**: Team libraries might require proper permissions in Figma. Ensure you have access to the libraries you're trying to use
 
 ## 🧪 Testing
 
@@ -203,5 +275,4 @@ This project is under the MIT License - see the [LICENSE](LICENSE) file for deta
 - Anthropic team for Claude and the Model Context Protocol
 - Figma community for their excellent plugin API
 - Sonny Lazuardi for the original Cursor Talk to Figma MCP implementation
-- Bun team for providing a fast JavaScript runtime 
-- Bun team for providing a fast JavaScript runtime 
+- Bun team for providing a fast JavaScript runtime

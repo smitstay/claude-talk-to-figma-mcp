@@ -142,6 +142,53 @@ async function handleCommand(command, params) {
       return await scanTextNodes(params);
     case "set_multiple_text_contents":
       return await setMultipleTextContents(params);
+    case "set_auto_layout":
+      return await setAutoLayout(params);
+    // Nuevos comandos para propiedades de texto
+    case "set_font_name":
+      return await setFontName(params);
+    case "set_font_size":
+      return await setFontSize(params);
+    case "set_font_weight":
+      return await setFontWeight(params);
+    case "set_letter_spacing":
+      return await setLetterSpacing(params);
+    case "set_line_height":
+      return await setLineHeight(params);
+    case "set_paragraph_spacing":
+      return await setParagraphSpacing(params);
+    case "set_text_case":
+      return await setTextCase(params);
+    case "set_text_decoration":
+      return await setTextDecoration(params);
+    case "get_styled_text_segments":
+      return await getStyledTextSegments(params);
+    case "load_font_async":
+      return await loadFontAsyncWrapper(params);
+    case "get_remote_components":
+      return await getRemoteComponents(params);
+    case "set_effects":
+      return await setEffects(params);
+    case "set_effect_style_id":
+      return await setEffectStyleId(params);
+    case "group_nodes":
+      return await groupNodes(params);
+    case "ungroup_nodes":
+      return await ungroupNodes(params);
+    case "flatten_node":
+      return await flattenNode(params);
+    case "insert_child":
+      return await insertChild(params);
+    case "create_ellipse":
+      return await createEllipse(params);
+    case "create_polygon":
+      return await createPolygon(params);
+    case "create_star":
+      return await createStar(params);
+    case "create_vector":
+      return await createVector(params);
+    case "create_line":
+      return await createLine(params);
     default:
       throw new Error(`Unknown command: ${command}`);
   }
@@ -1869,4 +1916,1256 @@ async function setMultipleTextContents(params) {
 // Function to generate simple UUIDs for command IDs
 function generateCommandId() {
   return 'cmd_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
+async function setAutoLayout(params) {
+  const { 
+    nodeId, 
+    layoutMode, 
+    paddingTop, 
+    paddingBottom, 
+    paddingLeft, 
+    paddingRight, 
+    itemSpacing, 
+    primaryAxisAlignItems, 
+    counterAxisAlignItems, 
+    layoutWrap, 
+    strokesIncludedInLayout 
+  } = params || {};
+
+  if (!nodeId) {
+    throw new Error("Missing nodeId parameter");
+  }
+
+  if (!layoutMode) {
+    throw new Error("Missing layoutMode parameter");
+  }
+
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+
+  // Check if the node is a frame or group
+  if (!("layoutMode" in node)) {
+    throw new Error(`Node does not support auto layout: ${nodeId}`);
+  }
+
+  // Configure layout mode
+  if (layoutMode === "NONE") {
+    node.layoutMode = "NONE";
+  } else {
+    // Set auto layout properties
+    node.layoutMode = layoutMode;
+    
+    // Configure padding if provided
+    if (paddingTop !== undefined) node.paddingTop = paddingTop;
+    if (paddingBottom !== undefined) node.paddingBottom = paddingBottom;
+    if (paddingLeft !== undefined) node.paddingLeft = paddingLeft;
+    if (paddingRight !== undefined) node.paddingRight = paddingRight;
+    
+    // Configure item spacing
+    if (itemSpacing !== undefined) node.itemSpacing = itemSpacing;
+    
+    // Configure alignment
+    if (primaryAxisAlignItems !== undefined) {
+      node.primaryAxisAlignItems = primaryAxisAlignItems;
+    }
+    
+    if (counterAxisAlignItems !== undefined) {
+      node.counterAxisAlignItems = counterAxisAlignItems;
+    }
+    
+    // Configure wrap
+    if (layoutWrap !== undefined) {
+      node.layoutWrap = layoutWrap;
+    }
+    
+    // Configure stroke inclusion
+    if (strokesIncludedInLayout !== undefined) {
+      node.strokesIncludedInLayout = strokesIncludedInLayout;
+    }
+  }
+
+  return {
+    id: node.id,
+    name: node.name,
+    layoutMode: node.layoutMode,
+    paddingTop: node.paddingTop,
+    paddingBottom: node.paddingBottom,
+    paddingLeft: node.paddingLeft,
+    paddingRight: node.paddingRight,
+    itemSpacing: node.itemSpacing,
+    primaryAxisAlignItems: node.primaryAxisAlignItems,
+    counterAxisAlignItems: node.counterAxisAlignItems,
+    layoutWrap: node.layoutWrap,
+    strokesIncludedInLayout: node.strokesIncludedInLayout
+  };
+}
+
+// Nuevas funciones para propiedades de texto
+
+async function setFontName(params) {
+  const { nodeId, family, style } = params || {};
+  if (!nodeId || !family) {
+    throw new Error("Missing nodeId or font family");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync({ family, style: style || "Regular" });
+    node.fontName = { family, style: style || "Regular" };
+    return {
+      id: node.id,
+      name: node.name,
+      fontName: node.fontName
+    };
+  } catch (error) {
+    throw new Error(`Error setting font name: ${error.message}`);
+  }
+}
+
+async function setFontSize(params) {
+  const { nodeId, fontSize } = params || {};
+  if (!nodeId || fontSize === undefined) {
+    throw new Error("Missing nodeId or fontSize");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.fontSize = fontSize;
+    return {
+      id: node.id,
+      name: node.name,
+      fontSize: node.fontSize
+    };
+  } catch (error) {
+    throw new Error(`Error setting font size: ${error.message}`);
+  }
+}
+
+async function setFontWeight(params) {
+  const { nodeId, weight } = params || {};
+  if (!nodeId || weight === undefined) {
+    throw new Error("Missing nodeId or weight");
+  }
+  
+  // Map weight to font style
+  const getFontStyle = (weight) => {
+    switch (weight) {
+      case 100: return "Thin";
+      case 200: return "Extra Light";
+      case 300: return "Light";
+      case 400: return "Regular";
+      case 500: return "Medium";
+      case 600: return "Semi Bold";
+      case 700: return "Bold";
+      case 800: return "Extra Bold";
+      case 900: return "Black";
+      default: return "Regular";
+    }
+  };
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    const family = node.fontName.family;
+    const style = getFontStyle(weight);
+    await figma.loadFontAsync({ family, style });
+    node.fontName = { family, style };
+    return {
+      id: node.id,
+      name: node.name,
+      fontName: node.fontName,
+      weight: weight
+    };
+  } catch (error) {
+    throw new Error(`Error setting font weight: ${error.message}`);
+  }
+}
+
+async function setLetterSpacing(params) {
+  const { nodeId, letterSpacing, unit = "PIXELS" } = params || {};
+  if (!nodeId || letterSpacing === undefined) {
+    throw new Error("Missing nodeId or letterSpacing");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.letterSpacing = { value: letterSpacing, unit };
+    return {
+      id: node.id,
+      name: node.name,
+      letterSpacing: node.letterSpacing
+    };
+  } catch (error) {
+    throw new Error(`Error setting letter spacing: ${error.message}`);
+  }
+}
+
+async function setLineHeight(params) {
+  const { nodeId, lineHeight, unit = "PIXELS" } = params || {};
+  if (!nodeId || lineHeight === undefined) {
+    throw new Error("Missing nodeId or lineHeight");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.lineHeight = { value: lineHeight, unit };
+    return {
+      id: node.id,
+      name: node.name,
+      lineHeight: node.lineHeight
+    };
+  } catch (error) {
+    throw new Error(`Error setting line height: ${error.message}`);
+  }
+}
+
+async function setParagraphSpacing(params) {
+  const { nodeId, paragraphSpacing } = params || {};
+  if (!nodeId || paragraphSpacing === undefined) {
+    throw new Error("Missing nodeId or paragraphSpacing");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.paragraphSpacing = paragraphSpacing;
+    return {
+      id: node.id,
+      name: node.name,
+      paragraphSpacing: node.paragraphSpacing
+    };
+  } catch (error) {
+    throw new Error(`Error setting paragraph spacing: ${error.message}`);
+  }
+}
+
+async function setTextCase(params) {
+  const { nodeId, textCase } = params || {};
+  if (!nodeId || textCase === undefined) {
+    throw new Error("Missing nodeId or textCase");
+  }
+  
+  // Valid textCase values: "ORIGINAL", "UPPER", "LOWER", "TITLE"
+  if (!["ORIGINAL", "UPPER", "LOWER", "TITLE"].includes(textCase)) {
+    throw new Error("Invalid textCase value. Must be one of: ORIGINAL, UPPER, LOWER, TITLE");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.textCase = textCase;
+    return {
+      id: node.id,
+      name: node.name,
+      textCase: node.textCase
+    };
+  } catch (error) {
+    throw new Error(`Error setting text case: ${error.message}`);
+  }
+}
+
+async function setTextDecoration(params) {
+  const { nodeId, textDecoration } = params || {};
+  if (!nodeId || textDecoration === undefined) {
+    throw new Error("Missing nodeId or textDecoration");
+  }
+  
+  // Valid textDecoration values: "NONE", "UNDERLINE", "STRIKETHROUGH"
+  if (!["NONE", "UNDERLINE", "STRIKETHROUGH"].includes(textDecoration)) {
+    throw new Error("Invalid textDecoration value. Must be one of: NONE, UNDERLINE, STRIKETHROUGH");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    await figma.loadFontAsync(node.fontName);
+    node.textDecoration = textDecoration;
+    return {
+      id: node.id,
+      name: node.name,
+      textDecoration: node.textDecoration
+    };
+  } catch (error) {
+    throw new Error(`Error setting text decoration: ${error.message}`);
+  }
+}
+
+async function getStyledTextSegments(params) {
+  const { nodeId, property } = params || {};
+  if (!nodeId || !property) {
+    throw new Error("Missing nodeId or property");
+  }
+  
+  // Valid properties: "fillStyleId", "fontName", "fontSize", "textCase", 
+  // "textDecoration", "textStyleId", "fills", "letterSpacing", "lineHeight", "fontWeight"
+  const validProperties = [
+    "fillStyleId", "fontName", "fontSize", "textCase", 
+    "textDecoration", "textStyleId", "fills", "letterSpacing", 
+    "lineHeight", "fontWeight"
+  ];
+  
+  if (!validProperties.includes(property)) {
+    throw new Error(`Invalid property. Must be one of: ${validProperties.join(", ")}`);
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (node.type !== "TEXT") {
+    throw new Error(`Node is not a text node: ${nodeId}`);
+  }
+  
+  try {
+    const segments = node.getStyledTextSegments([property]);
+    
+    // Prepare segments data in a format safe for serialization
+    const safeSegments = segments.map(segment => {
+      const safeSegment = {
+        characters: segment.characters,
+        start: segment.start,
+        end: segment.end
+      };
+      
+      // Handle different property types for safe serialization
+      if (property === "fontName") {
+        if (segment[property] && typeof segment[property] === "object") {
+          safeSegment[property] = {
+            family: segment[property].family || "",
+            style: segment[property].style || ""
+          };
+        } else {
+          safeSegment[property] = { family: "", style: "" };
+        }
+      } else if (property === "letterSpacing" || property === "lineHeight") {
+        // Handle spacing properties which have a value and unit
+        if (segment[property] && typeof segment[property] === "object") {
+          safeSegment[property] = {
+            value: segment[property].value || 0,
+            unit: segment[property].unit || "PIXELS"
+          };
+        } else {
+          safeSegment[property] = { value: 0, unit: "PIXELS" };
+        }
+      } else if (property === "fills") {
+        // Handle fills which can be complex
+        safeSegment[property] = segment[property] ? JSON.parse(JSON.stringify(segment[property])) : [];
+      } else {
+        // Handle simple properties
+        safeSegment[property] = segment[property];
+      }
+      
+      return safeSegment;
+    });
+    
+    return {
+      id: node.id,
+      name: node.name,
+      property: property,
+      segments: safeSegments
+    };
+  } catch (error) {
+    throw new Error(`Error getting styled text segments: ${error.message}`);
+  }
+}
+
+async function loadFontAsyncWrapper(params) {
+  const { family, style = "Regular" } = params || {};
+  if (!family) {
+    throw new Error("Missing font family");
+  }
+  
+  try {
+    await figma.loadFontAsync({ family, style });
+    return {
+      success: true,
+      family: family,
+      style: style,
+      message: `Successfully loaded ${family} ${style}`
+    };
+  } catch (error) {
+    throw new Error(`Error loading font: ${error.message}`);
+  }
+}
+
+async function getRemoteComponents() {
+  try {
+    // Check if figma.teamLibrary is available
+    if (!figma.teamLibrary) {
+      console.error("Error: figma.teamLibrary API is not available");
+      return {
+        error: true,
+        message: "The figma.teamLibrary API is not available in this context",
+        apiAvailable: false
+      };
+    }
+    
+    // Check if figma.teamLibrary.getAvailableComponentsAsync exists
+    if (!figma.teamLibrary.getAvailableComponentsAsync) {
+      console.error("Error: figma.teamLibrary.getAvailableComponentsAsync is not available");
+      return {
+        error: true,
+        message: "The getAvailableComponentsAsync method is not available",
+        apiAvailable: false
+      };
+    }
+    
+    console.log("Starting remote components retrieval...");
+    
+    // Set up a manual timeout to detect deadlocks
+    let timeoutId;
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error("Internal timeout while retrieving remote components (15s)"));
+      }, 15000); // 15 seconds internal timeout
+    });
+    
+    // Execute the request with a manual timeout
+    const fetchPromise = figma.teamLibrary.getAvailableComponentsAsync();
+    
+    // Use Promise.race to implement the timeout
+    const teamComponents = await Promise.race([fetchPromise, timeoutPromise])
+      .finally(() => {
+        clearTimeout(timeoutId); // Clear the timeout
+      });
+    
+    console.log(`Retrieved ${teamComponents.length} remote components`);
+    
+    return {
+      success: true,
+      count: teamComponents.length,
+      components: teamComponents.map(component => ({
+        key: component.key,
+        name: component.name,
+        description: component.description || "",
+        libraryName: component.libraryName
+      }))
+    };
+  } catch (error) {
+    console.error(`Detailed error retrieving remote components: ${error.message || "Unknown error"}`);
+    console.error(`Stack trace: ${error.stack || "Not available"}`);
+    
+    return {
+      error: true,
+      message: `Error retrieving remote components: ${error.message}`,
+      stack: error.stack,
+      apiAvailable: true,
+      methodExists: true
+    };
+  }
+}
+
+// Set Effects Tool
+async function setEffects(params) {
+  const { nodeId, effects } = params || {};
+  
+  if (!nodeId) {
+    throw new Error("Missing nodeId parameter");
+  }
+  
+  if (!effects || !Array.isArray(effects)) {
+    throw new Error("Missing or invalid effects parameter. Must be an array.");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (!("effects" in node)) {
+    throw new Error(`Node does not support effects: ${nodeId}`);
+  }
+  
+  try {
+    // Convert incoming effects to valid Figma effects
+    const validEffects = effects.map(effect => {
+      // Ensure all effects have the required properties
+      if (!effect.type) {
+        throw new Error("Each effect must have a type property");
+      }
+      
+      // Create a clean effect object based on type
+      switch (effect.type) {
+        case "DROP_SHADOW":
+        case "INNER_SHADOW":
+          return {
+            type: effect.type,
+            color: effect.color || { r: 0, g: 0, b: 0, a: 0.5 },
+            offset: effect.offset || { x: 0, y: 0 },
+            radius: effect.radius || 5,
+            spread: effect.spread || 0,
+            visible: effect.visible !== undefined ? effect.visible : true,
+            blendMode: effect.blendMode || "NORMAL"
+          };
+        case "LAYER_BLUR":
+        case "BACKGROUND_BLUR":
+          return {
+            type: effect.type,
+            radius: effect.radius || 5,
+            visible: effect.visible !== undefined ? effect.visible : true
+          };
+        default:
+          throw new Error(`Unsupported effect type: ${effect.type}`);
+      }
+    });
+    
+    // Apply the effects to the node
+    node.effects = validEffects;
+    
+    return {
+      id: node.id,
+      name: node.name,
+      effects: node.effects
+    };
+  } catch (error) {
+    throw new Error(`Error setting effects: ${error.message}`);
+  }
+}
+
+// Set Effect Style ID Tool
+async function setEffectStyleId(params) {
+  const { nodeId, effectStyleId } = params || {};
+  
+  if (!nodeId) {
+    throw new Error("Missing nodeId parameter");
+  }
+  
+  if (!effectStyleId) {
+    throw new Error("Missing effectStyleId parameter");
+  }
+  
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+  
+  if (!("effectStyleId" in node)) {
+    throw new Error(`Node does not support effect styles: ${nodeId}`);
+  }
+  
+  try {
+    // Try to find the effect style by ID
+    const effectStyles = await figma.getLocalEffectStylesAsync();
+    const foundStyle = effectStyles.find(style => style.id === effectStyleId);
+    
+    if (!foundStyle) {
+      throw new Error(`Effect style not found with ID: ${effectStyleId}`);
+    }
+    
+    // Apply the effect style to the node
+    node.effectStyleId = effectStyleId;
+    
+    return {
+      id: node.id,
+      name: node.name,
+      effectStyleId: node.effectStyleId,
+      appliedEffects: node.effects
+    };
+  } catch (error) {
+    throw new Error(`Error setting effect style ID: ${error.message}`);
+  }
+}
+
+// Function to group nodes
+async function groupNodes(params) {
+  const { nodeIds, name } = params || {};
+  
+  if (!nodeIds || !Array.isArray(nodeIds) || nodeIds.length < 2) {
+    throw new Error("Must provide at least two nodeIds to group");
+  }
+  
+  try {
+    // Get all nodes to be grouped
+    const nodesToGroup = [];
+    for (const nodeId of nodeIds) {
+      const node = await figma.getNodeByIdAsync(nodeId);
+      if (!node) {
+        throw new Error(`Node not found with ID: ${nodeId}`);
+      }
+      nodesToGroup.push(node);
+    }
+    
+    // Verify that all nodes have the same parent
+    const parent = nodesToGroup[0].parent;
+    for (const node of nodesToGroup) {
+      if (node.parent !== parent) {
+        throw new Error("All nodes must have the same parent to be grouped");
+      }
+    }
+    
+    // Create a group and add the nodes to it
+    const group = figma.group(nodesToGroup, parent);
+    
+    // Optionally set a name for the group
+    if (name) {
+      group.name = name;
+    }
+    
+    return {
+      id: group.id,
+      name: group.name,
+      type: group.type,
+      children: group.children.map(child => ({ id: child.id, name: child.name, type: child.type }))
+    };
+  } catch (error) {
+    throw new Error(`Error grouping nodes: ${error.message}`);
+  }
+}
+
+// Function to ungroup nodes
+async function ungroupNodes(params) {
+  const { nodeId } = params || {};
+  
+  if (!nodeId) {
+    throw new Error("Missing nodeId parameter");
+  }
+  
+  try {
+    const node = await figma.getNodeByIdAsync(nodeId);
+    if (!node) {
+      throw new Error(`Node not found with ID: ${nodeId}`);
+    }
+    
+    // Verify that the node is a group or a frame
+    if (node.type !== "GROUP" && node.type !== "FRAME") {
+      throw new Error(`Node with ID ${nodeId} is not a GROUP or FRAME`);
+    }
+    
+    // Get the parent and children before ungrouping
+    const parent = node.parent;
+    const children = [...node.children];
+    
+    // Ungroup the node
+    const ungroupedItems = figma.ungroup(node);
+    
+    return {
+      success: true,
+      ungroupedCount: ungroupedItems.length,
+      items: ungroupedItems.map(item => ({ id: item.id, name: item.name, type: item.type }))
+    };
+  } catch (error) {
+    throw new Error(`Error ungrouping node: ${error.message}`);
+  }
+}
+
+// Function to flatten nodes (e.g., boolean operations, convert to path)
+async function flattenNode(params) {
+  const { nodeId } = params || {};
+  
+  if (!nodeId) {
+    throw new Error("Missing nodeId parameter");
+  }
+  
+  try {
+    const node = await figma.getNodeByIdAsync(nodeId);
+    if (!node) {
+      throw new Error(`Node not found with ID: ${nodeId}`);
+    }
+    
+    // Check for specific node types that can be flattened
+    // Only certain node types like VECTOR, BOOLEAN_OPERATION, or STAR can be flattened
+    const flattenableTypes = ["VECTOR", "BOOLEAN_OPERATION", "STAR", "POLYGON", "ELLIPSE", "RECTANGLE"];
+    
+    if (!flattenableTypes.includes(node.type)) {
+      throw new Error(`Node with ID ${nodeId} and type ${node.type} cannot be flattened. Only vector-based nodes can be flattened.`);
+    }
+    
+    // Verify the node has the flatten method before calling it
+    if (typeof node.flatten !== 'function') {
+      throw new Error(`Node with ID ${nodeId} does not support the flatten operation.`);
+    }
+    
+    // Flatten the node
+    const flattened = node.flatten();
+    
+    return {
+      id: flattened.id,
+      name: flattened.name,
+      type: flattened.type
+    };
+  } catch (error) {
+    console.error(`Error in flattenNode: ${error.message}`);
+    throw new Error(`Error flattening node: ${error.message}`);
+  }
+}
+
+// Function to insert a child into a parent node
+async function insertChild(params) {
+  const { parentId, childId, index } = params || {};
+  
+  if (!parentId) {
+    throw new Error("Missing parentId parameter");
+  }
+  
+  if (!childId) {
+    throw new Error("Missing childId parameter");
+  }
+  
+  try {
+    // Get the parent and child nodes
+    const parent = await figma.getNodeByIdAsync(parentId);
+    if (!parent) {
+      throw new Error(`Parent node not found with ID: ${parentId}`);
+    }
+    
+    const child = await figma.getNodeByIdAsync(childId);
+    if (!child) {
+      throw new Error(`Child node not found with ID: ${childId}`);
+    }
+    
+    // Check if the parent can have children
+    if (!("appendChild" in parent)) {
+      throw new Error(`Parent node with ID ${parentId} cannot have children`);
+    }
+    
+    // Save child's current parent for proper handling
+    const originalParent = child.parent;
+    
+    // Insert the child at the specified index or append it
+    if (index !== undefined && index >= 0 && index <= parent.children.length) {
+      parent.insertChild(index, child);
+    } else {
+      parent.appendChild(child);
+    }
+    
+    // Verify that the insertion worked
+    const newIndex = parent.children.indexOf(child);
+    
+    return {
+      parentId: parent.id,
+      childId: child.id,
+      index: newIndex,
+      success: newIndex !== -1,
+      previousParentId: originalParent ? originalParent.id : null
+    };
+  } catch (error) {
+    console.error(`Error inserting child: ${error.message}`, error);
+    throw new Error(`Error inserting child: ${error.message}`);
+  }
+}
+
+async function createEllipse(params) {
+  const {
+    x = 0,
+    y = 0,
+    width = 100,
+    height = 100,
+    name = "Ellipse",
+    parentId,
+    fillColor = { r: 0.8, g: 0.8, b: 0.8, a: 1 },
+    strokeColor,
+    strokeWeight
+  } = params || {};
+
+  // Create a new ellipse node
+  const ellipse = figma.createEllipse();
+  ellipse.name = name;
+  
+  // Position and size the ellipse
+  ellipse.x = x;
+  ellipse.y = y;
+  ellipse.resize(width, height);
+  
+  // Set fill color if provided
+  if (fillColor) {
+    const fillStyle = {
+      type: "SOLID",
+      color: {
+        r: parseFloat(fillColor.r) || 0,
+        g: parseFloat(fillColor.g) || 0,
+        b: parseFloat(fillColor.b) || 0,
+      },
+      opacity: parseFloat(fillColor.a) || 1
+    };
+    ellipse.fills = [fillStyle];
+  }
+  
+  // Set stroke color and weight if provided
+  if (strokeColor) {
+    const strokeStyle = {
+      type: "SOLID",
+      color: {
+        r: parseFloat(strokeColor.r) || 0,
+        g: parseFloat(strokeColor.g) || 0,
+        b: parseFloat(strokeColor.b) || 0,
+      },
+      opacity: parseFloat(strokeColor.a) || 1
+    };
+    ellipse.strokes = [strokeStyle];
+    
+    if (strokeWeight) {
+      ellipse.strokeWeight = strokeWeight;
+    }
+  }
+
+  // If parentId is provided, append to that node, otherwise append to current page
+  if (parentId) {
+    const parentNode = await figma.getNodeByIdAsync(parentId);
+    if (!parentNode) {
+      throw new Error(`Parent node not found with ID: ${parentId}`);
+    }
+    if (!("appendChild" in parentNode)) {
+      throw new Error(`Parent node does not support children: ${parentId}`);
+    }
+    parentNode.appendChild(ellipse);
+  } else {
+    figma.currentPage.appendChild(ellipse);
+  }
+  
+  return {
+    id: ellipse.id,
+    name: ellipse.name,
+    type: ellipse.type,
+    x: ellipse.x,
+    y: ellipse.y,
+    width: ellipse.width,
+    height: ellipse.height
+  };
+}
+
+async function createPolygon(params) {
+  const {
+    x = 0,
+    y = 0,
+    width = 100,
+    height = 100,
+    sides = 6,
+    name = "Polygon",
+    parentId,
+    fillColor,
+    strokeColor,
+    strokeWeight
+  } = params || {};
+
+  // Create the polygon
+  const polygon = figma.createPolygon();
+  polygon.x = x;
+  polygon.y = y;
+  polygon.resize(width, height);
+  polygon.name = name;
+  
+  // Set the number of sides
+  if (sides >= 3) {
+    polygon.pointCount = sides;
+  }
+
+  // Set fill color if provided
+  if (fillColor) {
+    const paintStyle = {
+      type: "SOLID",
+      color: {
+        r: parseFloat(fillColor.r) || 0,
+        g: parseFloat(fillColor.g) || 0,
+        b: parseFloat(fillColor.b) || 0,
+      },
+      opacity: parseFloat(fillColor.a) || 1,
+    };
+    polygon.fills = [paintStyle];
+  }
+
+  // Set stroke color and weight if provided
+  if (strokeColor) {
+    const strokeStyle = {
+      type: "SOLID",
+      color: {
+        r: parseFloat(strokeColor.r) || 0,
+        g: parseFloat(strokeColor.g) || 0,
+        b: parseFloat(strokeColor.b) || 0,
+      },
+      opacity: parseFloat(strokeColor.a) || 1,
+    };
+    polygon.strokes = [strokeStyle];
+  }
+
+  // Set stroke weight if provided
+  if (strokeWeight !== undefined) {
+    polygon.strokeWeight = strokeWeight;
+  }
+
+  // If parentId is provided, append to that node, otherwise append to current page
+  if (parentId) {
+    const parentNode = await figma.getNodeByIdAsync(parentId);
+    if (!parentNode) {
+      throw new Error(`Parent node not found with ID: ${parentId}`);
+    }
+    if (!("appendChild" in parentNode)) {
+      throw new Error(`Parent node does not support children: ${parentId}`);
+    }
+    parentNode.appendChild(polygon);
+  } else {
+    figma.currentPage.appendChild(polygon);
+  }
+
+  return {
+    id: polygon.id,
+    name: polygon.name,
+    type: polygon.type,
+    x: polygon.x,
+    y: polygon.y,
+    width: polygon.width,
+    height: polygon.height,
+    pointCount: polygon.pointCount,
+    fills: polygon.fills,
+    strokes: polygon.strokes,
+    strokeWeight: polygon.strokeWeight,
+    parentId: polygon.parent ? polygon.parent.id : undefined,
+  };
+}
+
+async function createStar(params) {
+  const {
+    x = 0,
+    y = 0,
+    width = 100,
+    height = 100,
+    points = 5,
+    innerRadius = 0.5, // As a proportion of the outer radius
+    name = "Star",
+    parentId,
+    fillColor,
+    strokeColor,
+    strokeWeight
+  } = params || {};
+
+  // Create the star
+  const star = figma.createStar();
+  star.x = x;
+  star.y = y;
+  star.resize(width, height);
+  star.name = name;
+  
+  // Set the number of points
+  if (points >= 3) {
+    star.pointCount = points;
+  }
+
+  // Set the inner radius ratio
+  if (innerRadius > 0 && innerRadius < 1) {
+    star.innerRadius = innerRadius;
+  }
+
+  // Set fill color if provided
+  if (fillColor) {
+    const paintStyle = {
+      type: "SOLID",
+      color: {
+        r: parseFloat(fillColor.r) || 0,
+        g: parseFloat(fillColor.g) || 0,
+        b: parseFloat(fillColor.b) || 0,
+      },
+      opacity: parseFloat(fillColor.a) || 1,
+    };
+    star.fills = [paintStyle];
+  }
+
+  // Set stroke color and weight if provided
+  if (strokeColor) {
+    const strokeStyle = {
+      type: "SOLID",
+      color: {
+        r: parseFloat(strokeColor.r) || 0,
+        g: parseFloat(strokeColor.g) || 0,
+        b: parseFloat(strokeColor.b) || 0,
+      },
+      opacity: parseFloat(strokeColor.a) || 1,
+    };
+    star.strokes = [strokeStyle];
+  }
+
+  // Set stroke weight if provided
+  if (strokeWeight !== undefined) {
+    star.strokeWeight = strokeWeight;
+  }
+
+  // If parentId is provided, append to that node, otherwise append to current page
+  if (parentId) {
+    const parentNode = await figma.getNodeByIdAsync(parentId);
+    if (!parentNode) {
+      throw new Error(`Parent node not found with ID: ${parentId}`);
+    }
+    if (!("appendChild" in parentNode)) {
+      throw new Error(`Parent node does not support children: ${parentId}`);
+    }
+    parentNode.appendChild(star);
+  } else {
+    figma.currentPage.appendChild(star);
+  }
+
+  return {
+    id: star.id,
+    name: star.name,
+    type: star.type,
+    x: star.x,
+    y: star.y,
+    width: star.width,
+    height: star.height,
+    pointCount: star.pointCount,
+    innerRadius: star.innerRadius,
+    fills: star.fills,
+    strokes: star.strokes,
+    strokeWeight: star.strokeWeight,
+    parentId: star.parent ? star.parent.id : undefined,
+  };
+}
+
+async function createVector(params) {
+  const {
+    x = 0,
+    y = 0,
+    width = 100,
+    height = 100,
+    name = "Vector",
+    parentId,
+    vectorPaths = [],
+    fillColor,
+    strokeColor,
+    strokeWeight
+  } = params || {};
+
+  // Create the vector
+  const vector = figma.createVector();
+  vector.x = x;
+  vector.y = y;
+  vector.resize(width, height);
+  vector.name = name;
+
+  // Set vector paths if provided
+  if (vectorPaths && vectorPaths.length > 0) {
+    vector.vectorPaths = vectorPaths.map(path => {
+      return {
+        windingRule: path.windingRule || "EVENODD",
+        data: path.data || ""
+      };
+    });
+  }
+
+  // Set fill color if provided
+  if (fillColor) {
+    const paintStyle = {
+      type: "SOLID",
+      color: {
+        r: parseFloat(fillColor.r) || 0,
+        g: parseFloat(fillColor.g) || 0,
+        b: parseFloat(fillColor.b) || 0,
+      },
+      opacity: parseFloat(fillColor.a) || 1,
+    };
+    vector.fills = [paintStyle];
+  }
+
+  // Set stroke color and weight if provided
+  if (strokeColor) {
+    const strokeStyle = {
+      type: "SOLID",
+      color: {
+        r: parseFloat(strokeColor.r) || 0,
+        g: parseFloat(strokeColor.g) || 0,
+        b: parseFloat(strokeColor.b) || 0,
+      },
+      opacity: parseFloat(strokeColor.a) || 1,
+    };
+    vector.strokes = [strokeStyle];
+  }
+
+  // Set stroke weight if provided
+  if (strokeWeight !== undefined) {
+    vector.strokeWeight = strokeWeight;
+  }
+
+  // If parentId is provided, append to that node, otherwise append to current page
+  if (parentId) {
+    const parentNode = await figma.getNodeByIdAsync(parentId);
+    if (!parentNode) {
+      throw new Error(`Parent node not found with ID: ${parentId}`);
+    }
+    if (!("appendChild" in parentNode)) {
+      throw new Error(`Parent node does not support children: ${parentId}`);
+    }
+    parentNode.appendChild(vector);
+  } else {
+    figma.currentPage.appendChild(vector);
+  }
+
+  return {
+    id: vector.id,
+    name: vector.name,
+    type: vector.type,
+    x: vector.x,
+    y: vector.y,
+    width: vector.width,
+    height: vector.height,
+    vectorNetwork: vector.vectorNetwork,
+    fills: vector.fills,
+    strokes: vector.strokes,
+    strokeWeight: vector.strokeWeight,
+    parentId: vector.parent ? vector.parent.id : undefined,
+  };
+}
+
+async function createLine(params) {
+  const {
+    x1 = 0,
+    y1 = 0,
+    x2 = 100,
+    y2 = 0,
+    name = "Line",
+    parentId,
+    strokeColor = { r: 0, g: 0, b: 0, a: 1 },
+    strokeWeight = 1,
+    strokeCap = "NONE" // Can be "NONE", "ROUND", "SQUARE", "ARROW_LINES", or "ARROW_EQUILATERAL"
+  } = params || {};
+
+  // Create a vector node to represent the line
+  const line = figma.createVector();
+  line.name = name;
+  
+  // Position the line at the starting point
+  line.x = x1;
+  line.y = y1;
+  
+  // Calculate the vector size
+  const width = Math.abs(x2 - x1);
+  const height = Math.abs(y2 - y1);
+  line.resize(width > 0 ? width : 1, height > 0 ? height : 1);
+  
+  // Create vector path data for a straight line
+  // SVG path data format: M (move to) starting point, L (line to) ending point
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  
+  // Calculate relative endpoint coordinates in the vector's local coordinate system
+  const endX = dx > 0 ? width : 0;
+  const endY = dy > 0 ? height : 0;
+  const startX = dx > 0 ? 0 : width;
+  const startY = dy > 0 ? 0 : height;
+  
+  // Generate SVG path data for the line
+  const pathData = `M ${startX} ${startY} L ${endX} ${endY}`;
+  
+  // Set vector paths
+  line.vectorPaths = [{
+    windingRule: "NONZERO",
+    data: pathData
+  }];
+  
+  // Set stroke color
+  const strokeStyle = {
+    type: "SOLID",
+    color: {
+      r: parseFloat(strokeColor.r) || 0,
+      g: parseFloat(strokeColor.g) || 0,
+      b: parseFloat(strokeColor.b) || 0,
+    },
+    opacity: parseFloat(strokeColor.a) || 1
+  };
+  line.strokes = [strokeStyle];
+  
+  // Set stroke weight
+  line.strokeWeight = strokeWeight;
+  
+  // Set stroke cap style if supported
+  if (["NONE", "ROUND", "SQUARE", "ARROW_LINES", "ARROW_EQUILATERAL"].includes(strokeCap)) {
+    line.strokeCap = strokeCap;
+  }
+  
+  // Set fill to none (transparent) as lines typically don't have fills
+  line.fills = [];
+  
+  // If parentId is provided, append to that node, otherwise append to current page
+  if (parentId) {
+    const parentNode = await figma.getNodeByIdAsync(parentId);
+    if (!parentNode) {
+      throw new Error(`Parent node not found with ID: ${parentId}`);
+    }
+    if (!("appendChild" in parentNode)) {
+      throw new Error(`Parent node does not support children: ${parentId}`);
+    }
+    parentNode.appendChild(line);
+  } else {
+    figma.currentPage.appendChild(line);
+  }
+  
+  return {
+    id: line.id,
+    name: line.name,
+    type: line.type,
+    x: line.x,
+    y: line.y,
+    width: line.width,
+    height: line.height,
+    strokeWeight: line.strokeWeight,
+    strokeCap: line.strokeCap,
+    strokes: line.strokes,
+    vectorPaths: line.vectorPaths,
+    parentId: line.parent ? line.parent.id : undefined
+  };
 }

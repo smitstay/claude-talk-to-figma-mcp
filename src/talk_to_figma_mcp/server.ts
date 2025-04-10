@@ -56,7 +56,7 @@ let currentChannel: string | null = null;
 // Create MCP server
 const server = new McpServer({
   name: "ClaudeTalkToFigmaMCP",
-  version: "0.1.0",
+  version: "0.4.0",
 });
 
 // Add command line argument parsing
@@ -500,6 +500,213 @@ server.tool(
               }`,
           },
         ],
+      };
+    }
+  }
+);
+
+// Create Ellipse Tool
+server.tool(
+  "create_ellipse",
+  "Create a new ellipse in Figma",
+  {
+    x: z.number().describe("X position"),
+    y: z.number().describe("Y position"),
+    width: z.number().describe("Width of the ellipse"),
+    height: z.number().describe("Height of the ellipse"),
+    name: z.string().optional().describe("Optional name for the ellipse"),
+    parentId: z.string().optional().describe("Optional parent node ID to append the ellipse to"),
+    fillColor: z
+      .object({
+        r: z.number().min(0).max(1).describe("Red component (0-1)"),
+        g: z.number().min(0).max(1).describe("Green component (0-1)"),
+        b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+        a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
+      })
+      .optional()
+      .describe("Fill color in RGBA format"),
+    strokeColor: z
+      .object({
+        r: z.number().min(0).max(1).describe("Red component (0-1)"),
+        g: z.number().min(0).max(1).describe("Green component (0-1)"),
+        b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+        a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
+      })
+      .optional()
+      .describe("Stroke color in RGBA format"),
+    strokeWeight: z.number().positive().optional().describe("Stroke weight"),
+  },
+  async ({ x, y, width, height, name, parentId, fillColor, strokeColor, strokeWeight }) => {
+    try {
+      const result = await sendCommandToFigma("create_ellipse", {
+        x,
+        y,
+        width,
+        height,
+        name: name || "Ellipse",
+        parentId,
+        fillColor,
+        strokeColor,
+        strokeWeight,
+      });
+      
+      const typedResult = result as { id: string, name: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Created ellipse with ID: ${typedResult.id}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error creating ellipse: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Create Polygon Tool
+server.tool(
+  "create_polygon",
+  "Create a new polygon in Figma",
+  {
+    x: z.number().describe("X position"),
+    y: z.number().describe("Y position"),
+    width: z.number().describe("Width of the polygon"),
+    height: z.number().describe("Height of the polygon"),
+    sides: z.number().min(3).optional().describe("Number of sides (default: 6)"),
+    name: z.string().optional().describe("Optional name for the polygon"),
+    parentId: z.string().optional().describe("Optional parent node ID to append the polygon to"),
+    fillColor: z
+      .object({
+        r: z.number().min(0).max(1).describe("Red component (0-1)"),
+        g: z.number().min(0).max(1).describe("Green component (0-1)"),
+        b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+        a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
+      })
+      .optional()
+      .describe("Fill color in RGBA format"),
+    strokeColor: z
+      .object({
+        r: z.number().min(0).max(1).describe("Red component (0-1)"),
+        g: z.number().min(0).max(1).describe("Green component (0-1)"),
+        b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+        a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
+      })
+      .optional()
+      .describe("Stroke color in RGBA format"),
+    strokeWeight: z.number().positive().optional().describe("Stroke weight"),
+  },
+  async ({ x, y, width, height, sides, name, parentId, fillColor, strokeColor, strokeWeight }) => {
+    try {
+      const result = await sendCommandToFigma("create_polygon", {
+        x,
+        y,
+        width,
+        height,
+        sides: sides || 6,
+        name: name || "Polygon",
+        parentId,
+        fillColor,
+        strokeColor,
+        strokeWeight,
+      });
+      
+      const typedResult = result as { id: string, name: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Created polygon with ID: ${typedResult.id} and ${sides || 6} sides`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error creating polygon: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Create Star Tool
+server.tool(
+  "create_star",
+  "Create a new star in Figma",
+  {
+    x: z.number().describe("X position"),
+    y: z.number().describe("Y position"),
+    width: z.number().describe("Width of the star"),
+    height: z.number().describe("Height of the star"),
+    points: z.number().min(3).optional().describe("Number of points (default: 5)"),
+    innerRadius: z.number().min(0.01).max(0.99).optional().describe("Inner radius ratio (0.01-0.99, default: 0.5)"),
+    name: z.string().optional().describe("Optional name for the star"),
+    parentId: z.string().optional().describe("Optional parent node ID to append the star to"),
+    fillColor: z
+      .object({
+        r: z.number().min(0).max(1).describe("Red component (0-1)"),
+        g: z.number().min(0).max(1).describe("Green component (0-1)"),
+        b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+        a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
+      })
+      .optional()
+      .describe("Fill color in RGBA format"),
+    strokeColor: z
+      .object({
+        r: z.number().min(0).max(1).describe("Red component (0-1)"),
+        g: z.number().min(0).max(1).describe("Green component (0-1)"),
+        b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+        a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
+      })
+      .optional()
+      .describe("Stroke color in RGBA format"),
+    strokeWeight: z.number().positive().optional().describe("Stroke weight"),
+  },
+  async ({ x, y, width, height, points, innerRadius, name, parentId, fillColor, strokeColor, strokeWeight }) => {
+    try {
+      const result = await sendCommandToFigma("create_star", {
+        x,
+        y,
+        width,
+        height,
+        points: points || 5,
+        innerRadius: innerRadius || 0.5,
+        name: name || "Star",
+        parentId,
+        fillColor,
+        strokeColor,
+        strokeWeight,
+      });
+      
+      const typedResult = result as { id: string, name: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Created star with ID: ${typedResult.id}, ${points || 5} points, and inner radius ratio of ${innerRadius || 0.5}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error creating star: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
       };
     }
   }
@@ -954,6 +1161,468 @@ server.tool(
   }
 );
 
+// Auto Layout Tool
+server.tool(
+  "set_auto_layout",
+  "Configure auto layout properties for a node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the node to configure auto layout"),
+    layoutMode: z.enum(["HORIZONTAL", "VERTICAL", "NONE"]).describe("Layout direction"),
+    paddingTop: z.number().optional().describe("Top padding in pixels"),
+    paddingBottom: z.number().optional().describe("Bottom padding in pixels"),
+    paddingLeft: z.number().optional().describe("Left padding in pixels"),
+    paddingRight: z.number().optional().describe("Right padding in pixels"),
+    itemSpacing: z.number().optional().describe("Spacing between items in pixels"),
+    primaryAxisAlignItems: z.enum(["MIN", "CENTER", "MAX", "SPACE_BETWEEN"]).optional().describe("Alignment along primary axis"),
+    counterAxisAlignItems: z.enum(["MIN", "CENTER", "MAX"]).optional().describe("Alignment along counter axis"),
+    layoutWrap: z.enum(["WRAP", "NO_WRAP"]).optional().describe("Whether items wrap to new lines"),
+    strokesIncludedInLayout: z.boolean().optional().describe("Whether strokes are included in layout calculations")
+  },
+  async ({ nodeId, layoutMode, paddingTop, paddingBottom, paddingLeft, paddingRight, 
+           itemSpacing, primaryAxisAlignItems, counterAxisAlignItems, layoutWrap, strokesIncludedInLayout }) => {
+    try {
+      const result = await sendCommandToFigma("set_auto_layout", { 
+        nodeId, 
+        layoutMode, 
+        paddingTop, 
+        paddingBottom, 
+        paddingLeft, 
+        paddingRight, 
+        itemSpacing, 
+        primaryAxisAlignItems, 
+        counterAxisAlignItems, 
+        layoutWrap, 
+        strokesIncludedInLayout 
+      });
+      
+      const typedResult = result as { name: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Applied auto layout to node "${typedResult.name}" with mode: ${layoutMode}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting auto layout: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Font Name Tool
+server.tool(
+  "set_font_name",
+  "Set the font name and style of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    family: z.string().describe("Font family name"),
+    style: z.string().optional().describe("Font style (e.g., 'Regular', 'Bold', 'Italic')"),
+  },
+  async ({ nodeId, family, style }) => {
+    try {
+      const result = await sendCommandToFigma("set_font_name", {
+        nodeId,
+        family,
+        style
+      });
+      const typedResult = result as { name: string, fontName: { family: string, style: string } };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated font of node "${typedResult.name}" to ${typedResult.fontName.family} ${typedResult.fontName.style}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting font name: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Font Size Tool
+server.tool(
+  "set_font_size",
+  "Set the font size of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    fontSize: z.number().positive().describe("Font size in pixels"),
+  },
+  async ({ nodeId, fontSize }) => {
+    try {
+      const result = await sendCommandToFigma("set_font_size", {
+        nodeId,
+        fontSize
+      });
+      const typedResult = result as { name: string, fontSize: number };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated font size of node "${typedResult.name}" to ${typedResult.fontSize}px`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting font size: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Font Weight Tool
+server.tool(
+  "set_font_weight",
+  "Set the font weight of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    weight: z.number().describe("Font weight (100, 200, 300, 400, 500, 600, 700, 800, 900)"),
+  },
+  async ({ nodeId, weight }) => {
+    try {
+      const result = await sendCommandToFigma("set_font_weight", {
+        nodeId,
+        weight
+      });
+      const typedResult = result as { name: string, fontName: { family: string, style: string }, weight: number };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated font weight of node "${typedResult.name}" to ${typedResult.weight} (${typedResult.fontName.style})`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting font weight: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Letter Spacing Tool
+server.tool(
+  "set_letter_spacing",
+  "Set the letter spacing of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    letterSpacing: z.number().describe("Letter spacing value"),
+    unit: z.enum(["PIXELS", "PERCENT"]).optional().describe("Unit type (PIXELS or PERCENT)"),
+  },
+  async ({ nodeId, letterSpacing, unit }) => {
+    try {
+      const result = await sendCommandToFigma("set_letter_spacing", {
+        nodeId,
+        letterSpacing,
+        unit: unit || "PIXELS"
+      });
+      const typedResult = result as { name: string, letterSpacing: { value: number, unit: string } };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated letter spacing of node "${typedResult.name}" to ${typedResult.letterSpacing.value} ${typedResult.letterSpacing.unit}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting letter spacing: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Line Height Tool
+server.tool(
+  "set_line_height",
+  "Set the line height of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    lineHeight: z.number().describe("Line height value"),
+    unit: z.enum(["PIXELS", "PERCENT", "AUTO"]).optional().describe("Unit type (PIXELS, PERCENT, or AUTO)"),
+  },
+  async ({ nodeId, lineHeight, unit }) => {
+    try {
+      const result = await sendCommandToFigma("set_line_height", {
+        nodeId,
+        lineHeight,
+        unit: unit || "PIXELS"
+      });
+      const typedResult = result as { name: string, lineHeight: { value: number, unit: string } };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated line height of node "${typedResult.name}" to ${typedResult.lineHeight.value} ${typedResult.lineHeight.unit}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting line height: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Paragraph Spacing Tool
+server.tool(
+  "set_paragraph_spacing",
+  "Set the paragraph spacing of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    paragraphSpacing: z.number().describe("Paragraph spacing value in pixels"),
+  },
+  async ({ nodeId, paragraphSpacing }) => {
+    try {
+      const result = await sendCommandToFigma("set_paragraph_spacing", {
+        nodeId,
+        paragraphSpacing
+      });
+      const typedResult = result as { name: string, paragraphSpacing: number };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated paragraph spacing of node "${typedResult.name}" to ${typedResult.paragraphSpacing}px`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting paragraph spacing: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Text Case Tool
+server.tool(
+  "set_text_case",
+  "Set the text case of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    textCase: z.enum(["ORIGINAL", "UPPER", "LOWER", "TITLE"]).describe("Text case type"),
+  },
+  async ({ nodeId, textCase }) => {
+    try {
+      const result = await sendCommandToFigma("set_text_case", {
+        nodeId,
+        textCase
+      });
+      const typedResult = result as { name: string, textCase: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated text case of node "${typedResult.name}" to ${typedResult.textCase}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting text case: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Text Decoration Tool
+server.tool(
+  "set_text_decoration",
+  "Set the text decoration of a text node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the text node to modify"),
+    textDecoration: z.enum(["NONE", "UNDERLINE", "STRIKETHROUGH"]).describe("Text decoration type"),
+  },
+  async ({ nodeId, textDecoration }) => {
+    try {
+      const result = await sendCommandToFigma("set_text_decoration", {
+        nodeId,
+        textDecoration
+      });
+      const typedResult = result as { name: string, textDecoration: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Updated text decoration of node "${typedResult.name}" to ${typedResult.textDecoration}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting text decoration: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Get Styled Text Segments Tool
+server.tool(
+  "get_styled_text_segments",
+  "Get text segments with specific styling in a text node",
+  {
+    nodeId: z.string().describe("The ID of the text node to analyze"),
+    property: z.enum([
+      "fillStyleId", 
+      "fontName", 
+      "fontSize", 
+      "textCase", 
+      "textDecoration", 
+      "textStyleId", 
+      "fills", 
+      "letterSpacing", 
+      "lineHeight", 
+      "fontWeight"
+    ]).describe("The style property to analyze segments by"),
+  },
+  async ({ nodeId, property }) => {
+    try {
+      const result = await sendCommandToFigma("get_styled_text_segments", {
+        nodeId,
+        property
+      });
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2)
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error getting styled text segments: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Load Font Async Tool
+server.tool(
+  "load_font_async",
+  "Load a font asynchronously in Figma",
+  {
+    family: z.string().describe("Font family name"),
+    style: z.string().optional().describe("Font style (e.g., 'Regular', 'Bold', 'Italic')"),
+  },
+  async ({ family, style }) => {
+    try {
+      const result = await sendCommandToFigma("load_font_async", {
+        family,
+        style: style || "Regular"
+      });
+      const typedResult = result as { success: boolean, family: string, style: string, message: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: typedResult.message || `Loaded font ${family} ${style || "Regular"}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error loading font: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Get Remote Components Tool
+server.tool(
+  "get_remote_components",
+  "Get available components from team libraries in Figma",
+  {},
+  async () => {
+    try {
+      const result = await sendCommandToFigma("get_remote_components");
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2)
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error getting remote components: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
 // Define design strategy prompt
 server.prompt(
   "design_strategy",
@@ -1390,6 +2059,264 @@ server.tool(
   }
 );
 
+// Set Effects Tool
+server.tool(
+  "set_effects",
+  "Set the visual effects of a node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the node to modify"),
+    effects: z.array(
+      z.object({
+        type: z.enum(["DROP_SHADOW", "INNER_SHADOW", "LAYER_BLUR", "BACKGROUND_BLUR"]).describe("Effect type"),
+        color: z.object({
+          r: z.number().min(0).max(1).describe("Red (0-1)"),
+          g: z.number().min(0).max(1).describe("Green (0-1)"),
+          b: z.number().min(0).max(1).describe("Blue (0-1)"),
+          a: z.number().min(0).max(1).describe("Alpha (0-1)")
+        }).optional().describe("Effect color (for shadows)"),
+        offset: z.object({
+          x: z.number().describe("X offset"),
+          y: z.number().describe("Y offset")
+        }).optional().describe("Offset (for shadows)"),
+        radius: z.number().optional().describe("Effect radius"),
+        spread: z.number().optional().describe("Shadow spread (for shadows)"),
+        visible: z.boolean().optional().describe("Whether the effect is visible"),
+        blendMode: z.string().optional().describe("Blend mode")
+      })
+    ).describe("Array of effects to apply")
+  },
+  async ({ nodeId, effects }) => {
+    try {
+      const result = await sendCommandToFigma("set_effects", {
+        nodeId,
+        effects
+      });
+      
+      const typedResult = result as { name: string, effects: any[] };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Successfully applied ${effects.length} effect(s) to node "${typedResult.name}"`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting effects: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Set Effect Style ID Tool
+server.tool(
+  "set_effect_style_id",
+  "Apply an effect style to a node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the node to modify"),
+    effectStyleId: z.string().describe("The ID of the effect style to apply")
+  },
+  async ({ nodeId, effectStyleId }) => {
+    try {
+      const result = await sendCommandToFigma("set_effect_style_id", {
+        nodeId,
+        effectStyleId
+      });
+      
+      const typedResult = result as { name: string, effectStyleId: string };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Successfully applied effect style to node "${typedResult.name}"`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting effect style: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Group Nodes Tool
+server.tool(
+  "group_nodes",
+  "Group nodes in Figma",
+  {
+    nodeIds: z.array(z.string()).describe("Array of IDs of the nodes to group"),
+    name: z.string().optional().describe("Optional name for the group")
+  },
+  async ({ nodeIds, name }) => {
+    try {
+      const result = await sendCommandToFigma("group_nodes", { 
+        nodeIds, 
+        name 
+      });
+      
+      const typedResult = result as { 
+        id: string, 
+        name: string, 
+        type: string, 
+        children: Array<{ id: string, name: string, type: string }> 
+      };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Nodes successfully grouped into "${typedResult.name}" with ID: ${typedResult.id}. The group contains ${typedResult.children.length} elements.`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error grouping nodes: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Ungroup Nodes Tool
+server.tool(
+  "ungroup_nodes",
+  "Ungroup nodes in Figma",
+  {
+    nodeId: z.string().describe("ID of the node (group or frame) to ungroup"),
+  },
+  async ({ nodeId }) => {
+    try {
+      const result = await sendCommandToFigma("ungroup_nodes", { nodeId });
+      
+      const typedResult = result as { 
+        success: boolean, 
+        ungroupedCount: number, 
+        items: Array<{ id: string, name: string, type: string }> 
+      };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Node successfully ungrouped. ${typedResult.ungroupedCount} elements were released.`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error ungrouping node: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Flatten Node Tool
+server.tool(
+  "flatten_node",
+  "Flatten a node in Figma (e.g., for boolean operations or converting to path)",
+  {
+    nodeId: z.string().describe("ID of the node to flatten"),
+  },
+  async ({ nodeId }) => {
+    try {
+      const result = await sendCommandToFigma("flatten_node", { nodeId });
+      
+      const typedResult = result as { 
+        id: string, 
+        name: string, 
+        type: string 
+      };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Node "${typedResult.name}" flattened successfully. The new node has ID: ${typedResult.id} and is of type ${typedResult.type}.`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error flattening node: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
+// Insert Child Tool
+server.tool(
+  "insert_child",
+  "Insert a child node inside a parent node in Figma",
+  {
+    parentId: z.string().describe("ID of the parent node where the child will be inserted"),
+    childId: z.string().describe("ID of the child node to insert"),
+    index: z.number().optional().describe("Optional index where to insert the child (if not specified, it will be added at the end)")
+  },
+  async ({ parentId, childId, index }) => {
+    try {
+      const result = await sendCommandToFigma("insert_child", { 
+        parentId, 
+        childId,
+        index 
+      });
+      
+      const typedResult = result as { 
+        parentId: string,
+        childId: string,
+        index: number,
+        success: boolean
+      };
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Child node with ID: ${typedResult.childId} successfully inserted into parent node with ID: ${typedResult.parentId}${index !== undefined ? ` at position ${typedResult.index}` : ''}.`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error inserting child node: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
 // Define command types and parameters
 type FigmaCommand =
   | "get_document_info"
@@ -1398,6 +2325,11 @@ type FigmaCommand =
   | "create_rectangle"
   | "create_frame"
   | "create_text"
+  | "create_ellipse"
+  | "create_polygon"
+  | "create_star"
+  | "create_vector"
+  | "create_line"
   | "set_fill_color"
   | "set_stroke_color"
   | "move_node"
@@ -1413,7 +2345,25 @@ type FigmaCommand =
   | "clone_node"
   | "set_text_content"
   | "scan_text_nodes"
-  | "set_multiple_text_contents";
+  | "set_multiple_text_contents"
+  | "set_auto_layout"
+  | "set_font_name"
+  | "set_font_size"
+  | "set_font_weight"
+  | "set_letter_spacing"
+  | "set_line_height"
+  | "set_paragraph_spacing"
+  | "set_text_case"
+  | "set_text_decoration"
+  | "get_styled_text_segments"
+  | "load_font_async"
+  | "get_remote_components"
+  | "set_effects"
+  | "set_effect_style_id"
+  | "group_nodes"
+  | "ungroup_nodes"
+  | "flatten_node"
+  | "insert_child";
 
 // Helper function to process Figma node responses
 function processFigmaNodeResponse(result: unknown): any {
