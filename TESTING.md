@@ -33,9 +33,9 @@ Before starting the tests, make sure you have:
 
 #### Install the Figma Plugin
 
-1. Install the [Cursor Talk to Figma MCP Plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin) from Figma Community
-2. Open Figma and locate the plugin in your plugins list
-3. Run the plugin
+1. Open Figma and go to **Menu > Plugins > Development > New Plugin**
+2. Select "Link existing plugin"
+3. Navigate to and select the folder `src/claude_mcp_plugin` from this repository
 
 #### Connect Plugin to WebSocket Server
 
@@ -49,7 +49,7 @@ Before starting the tests, make sure you have:
 To test if the Figma plugin is correctly communicating with the Claude MCP server:
 
 1. Start the WebSocket server
-2. Open Figma and run the Cursor Talk to Figma MCP Plugin
+2. Open Figma and run the Claude MCP Plugin from your Development plugins
 3. Connect to the WebSocket server 
 4. Open Claude Desktop and select the "ClaudeTalkToFigma" MCP
 5. Test a simple command in Claude like: "Can you show me information about my current Figma document?"

@@ -142,6 +142,8 @@ async function handleCommand(command, params) {
       return await scanTextNodes(params);
     case "set_multiple_text_contents":
       return await setMultipleTextContents(params);
+    case "set_auto_layout":
+      return await setAutoLayout(params);
     default:
       throw new Error(`Unknown command: ${command}`);
   }
@@ -1869,4 +1871,89 @@ async function setMultipleTextContents(params) {
 // Function to generate simple UUIDs for command IDs
 function generateCommandId() {
   return 'cmd_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
+async function setAutoLayout(params) {
+  const { 
+    nodeId, 
+    layoutMode, 
+    paddingTop, 
+    paddingBottom, 
+    paddingLeft, 
+    paddingRight, 
+    itemSpacing, 
+    primaryAxisAlignItems, 
+    counterAxisAlignItems, 
+    layoutWrap, 
+    strokesIncludedInLayout 
+  } = params || {};
+
+  if (!nodeId) {
+    throw new Error("Missing nodeId parameter");
+  }
+
+  if (!layoutMode) {
+    throw new Error("Missing layoutMode parameter");
+  }
+
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node) {
+    throw new Error(`Node not found with ID: ${nodeId}`);
+  }
+
+  // Verificar que el nodo es un frame o grupo
+  if (!("layoutMode" in node)) {
+    throw new Error(`Node does not support auto layout: ${nodeId}`);
+  }
+
+  // Configurar el modo de layout
+  if (layoutMode === "NONE") {
+    node.layoutMode = "NONE";
+  } else {
+    // Establecer propiedades de auto layout
+    node.layoutMode = layoutMode;
+    
+    // Configurar padding si se proporciona
+    if (paddingTop !== undefined) node.paddingTop = paddingTop;
+    if (paddingBottom !== undefined) node.paddingBottom = paddingBottom;
+    if (paddingLeft !== undefined) node.paddingLeft = paddingLeft;
+    if (paddingRight !== undefined) node.paddingRight = paddingRight;
+    
+    // Configurar espaciado entre items
+    if (itemSpacing !== undefined) node.itemSpacing = itemSpacing;
+    
+    // Configurar alineación
+    if (primaryAxisAlignItems !== undefined) {
+      node.primaryAxisAlignItems = primaryAxisAlignItems;
+    }
+    
+    if (counterAxisAlignItems !== undefined) {
+      node.counterAxisAlignItems = counterAxisAlignItems;
+    }
+    
+    // Configurar wrap
+    if (layoutWrap !== undefined) {
+      node.layoutWrap = layoutWrap;
+    }
+    
+    // Configurar inclusión de bordes
+    if (strokesIncludedInLayout !== undefined) {
+      node.strokesIncludedInLayout = strokesIncludedInLayout;
+    }
+  }
+
+  return {
+    id: node.id,
+    name: node.name,
+    layoutMode: node.layoutMode,
+    paddingTop: node.paddingTop,
+    paddingBottom: node.paddingBottom,
+    paddingLeft: node.paddingLeft,
+    paddingRight: node.paddingRight,
+    itemSpacing: node.itemSpacing,
+    primaryAxisAlignItems: node.primaryAxisAlignItems,
+    counterAxisAlignItems: node.counterAxisAlignItems,
+    layoutWrap: node.layoutWrap,
+    strokesIncludedInLayout: node.strokesIncludedInLayout
+  };
 }

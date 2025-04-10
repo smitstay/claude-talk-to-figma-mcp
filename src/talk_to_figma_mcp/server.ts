@@ -954,6 +954,62 @@ server.tool(
   }
 );
 
+// Auto Layout Tool
+server.tool(
+  "set_auto_layout",
+  "Configure auto layout properties for a node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the node to configure auto layout"),
+    layoutMode: z.enum(["HORIZONTAL", "VERTICAL", "NONE"]).describe("Layout direction"),
+    paddingTop: z.number().optional().describe("Top padding in pixels"),
+    paddingBottom: z.number().optional().describe("Bottom padding in pixels"),
+    paddingLeft: z.number().optional().describe("Left padding in pixels"),
+    paddingRight: z.number().optional().describe("Right padding in pixels"),
+    itemSpacing: z.number().optional().describe("Spacing between items in pixels"),
+    primaryAxisAlignItems: z.enum(["MIN", "CENTER", "MAX", "SPACE_BETWEEN"]).optional().describe("Alignment along primary axis"),
+    counterAxisAlignItems: z.enum(["MIN", "CENTER", "MAX"]).optional().describe("Alignment along counter axis"),
+    layoutWrap: z.enum(["WRAP", "NO_WRAP"]).optional().describe("Whether items wrap to new lines"),
+    strokesIncludedInLayout: z.boolean().optional().describe("Whether strokes are included in layout calculations")
+  },
+  async ({ nodeId, layoutMode, paddingTop, paddingBottom, paddingLeft, paddingRight, 
+           itemSpacing, primaryAxisAlignItems, counterAxisAlignItems, layoutWrap, strokesIncludedInLayout }) => {
+    try {
+      const result = await sendCommandToFigma("set_auto_layout", { 
+        nodeId, 
+        layoutMode, 
+        paddingTop, 
+        paddingBottom, 
+        paddingLeft, 
+        paddingRight, 
+        itemSpacing, 
+        primaryAxisAlignItems, 
+        counterAxisAlignItems, 
+        layoutWrap, 
+        strokesIncludedInLayout 
+      });
+      
+      const typedResult = result as { name: string };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Applied auto layout to node "${typedResult.name}" with mode: ${layoutMode}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error setting auto layout: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ]
+      };
+    }
+  }
+);
+
 // Define design strategy prompt
 server.prompt(
   "design_strategy",
@@ -1413,7 +1469,8 @@ type FigmaCommand =
   | "clone_node"
   | "set_text_content"
   | "scan_text_nodes"
-  | "set_multiple_text_contents";
+  | "set_multiple_text_contents"
+  | "set_auto_layout";
 
 // Helper function to process Figma node responses
 function processFigmaNodeResponse(result: unknown): any {
