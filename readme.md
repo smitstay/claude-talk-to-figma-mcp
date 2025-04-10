@@ -64,7 +64,7 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
    - Open Figma
    - Go to **Menu > Plugins > Development > New Plugin**
    - Select "Link existing plugin"
-   - Navigate and select the `src/claude_mcp_plugin` folder from this repository
+   - Navigate and select the `src/claude_mcp_plugin/src/claude_mcp_plugin/manifest.json` file from this repository
 
    The plugin will appear in your development plugins list and you can use it like any other plugin.
 
