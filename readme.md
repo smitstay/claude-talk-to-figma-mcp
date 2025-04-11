@@ -63,7 +63,7 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
    a. Create a new plugin in development mode in Figma:
    - Open Figma
    - Go to **Menu > Plugins > Development > New Plugin**
-   - Select "Link existing plugin"
+   - Select "Import plugin from manifest"
    - Navigate and select the `src/claude_mcp_plugin/src/claude_mcp_plugin/manifest.json` file from this repository
 
    The plugin will appear in your development plugins list and you can use it like any other plugin.
@@ -86,7 +86,7 @@ Once installed, you just need to start it:
 
    Open the Claude MCP Plugin in Figma and copy the channel ID generated to provide it to Claude.
 
-   <img src="images/mcp-figma-plugin-configuration.png" width="300" alt="Figma Plugin Configuration" style="max-width: 250px;" />
+   <img src="images/mcp-figma-plugin-configuration.png" width="300" alt="Figma Plugin Configuration" />
 
 4. **Claude Desktop**:
 
