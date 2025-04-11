@@ -86,7 +86,7 @@ Once installed, you just need to start it:
 
    Open the Claude MCP Plugin in Figma and copy the channel ID generated to provide it to Claude.
 
-   <img src="images/mcp-figma-plugin-configuration.png" alt="Figma Plugin Configuration" style="max-width: 250px;" />
+   <img src="images/mcp-figma-plugin-configuration.png" width="300" alt="Figma Plugin Configuration" style="max-width: 250px;" />
 
 4. **Claude Desktop**:
 
