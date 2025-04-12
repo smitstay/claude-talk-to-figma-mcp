@@ -60,7 +60,6 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
    
    > **Note**: This project uses a custom Figma plugin located in the `src/claude_mcp_plugin` folder.
 
-   a. Create a new plugin in development mode in Figma:
    - Open Figma
    - Go to **Menu > Plugins > Development > New Plugin**
    - Select "Import plugin from manifest"
