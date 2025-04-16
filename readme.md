@@ -1,3 +1,5 @@
+<img src="images/claude-talk-to-figma.png" alt="Claude Talk to Figma collage" />
+
 # Claude Talk to Figma MCP
 
 A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact directly with Figma, enabling powerful AI-assisted design capabilities.
