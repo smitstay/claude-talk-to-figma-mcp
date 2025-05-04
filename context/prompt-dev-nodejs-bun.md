@@ -93,4 +93,13 @@ Cuando termines:
 3. Después de esto para a la espera de más instrucciones
 
 
+Comentarios/mensajes dentro del código siempre en inglés.
+
+Cuando termines:
+
+1. Indica en el context/05- que el punto está resuelto.
+2. En el context/06, describe qué has hecho y porqué lo has hecho
+3. Después de esto para a la espera de más instrucciones
+
+
 Error getting document info: Must join a channel before sending commands
