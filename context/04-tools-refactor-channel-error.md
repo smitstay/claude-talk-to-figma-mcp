@@ -20,20 +20,20 @@ Después de revisar el código, hemos identificado la causa raíz:
    }
    ```
 
-2. En la implementación de la herramienta `join_channel` en `document-tools.ts`, se está usando el comando "join" correctamente:
+2. En la implementación de la herramienta `join_channel` en `document-tools.ts`, se estaba usando el comando "join" correctamente:
    ```typescript
    await sendCommandToFigma("join", { channel: channel });
    ```
 
-3. Sin embargo, hay una inconsistencia entre cómo se maneja el comando "join" y cómo se actualiza la variable `currentChannel`:
+3. Sin embargo, existía una inconsistencia entre cómo se maneja el comando "join" y cómo se actualiza la variable `currentChannel`:
 
    - La función `joinChannel` en `websocket.ts` establece `currentChannel = channelName` después de una unión exitosa
-   - Pero la herramienta `join_channel` llama directamente a `sendCommandToFigma("join", ...)` en lugar de usar la función `joinChannel`
-   - Como resultado, aunque el comando "join" se ejecuta correctamente, la variable `currentChannel` no se actualiza
+   - Pero la herramienta `join_channel` llamaba directamente a `sendCommandToFigma("join", ...)` en lugar de usar la función `joinChannel`
+   - Como resultado, aunque el comando "join" se ejecutaba correctamente, la variable `currentChannel` no se actualizaba
 
-## Solución Propuesta
+## Solución Implementada
 
-La solución implica una modificación en la herramienta `join_channel` para asegurar que se actualice correctamente la variable `currentChannel`:
+La solución implicó una modificación en la herramienta `join_channel` para asegurar que se actualice correctamente la variable `currentChannel`:
 
 ```typescript
 // Join Channel Tool - Versión corregida
@@ -87,31 +87,47 @@ server.tool(
 );
 ```
 
-### Cambios Clave:
+### Cambios Clave Implementados:
 
-1. Reemplazar `await sendCommandToFigma("join", { channel: channel });` con `await joinChannel(channel);`
-2. La función `joinChannel` ya maneja internamente:
+1. Se reemplazó `await sendCommandToFigma("join", { channel: channel });` con `await joinChannel(channel);`
+2. La función `joinChannel` maneja internamente:
    - Enviar el comando "join" a Figma
    - Actualizar la variable `currentChannel`
    - Manejar errores apropiadamente
 
-## Implementación
+### Detalles de la Implementación
 
 Para implementar esta solución:
 
-1. Modificar el archivo `src/talk_to_figma_mcp/tools/document-tools.ts`
-2. Añadir la importación de la función `joinChannel` desde `../utils/websocket`
-3. Reemplazar la implementación actual de la herramienta `join_channel` con la versión corregida
+1. Se modificó el archivo `src/talk_to_figma_mcp/tools/document-tools.ts`
+2. Se añadió la importación de la función `joinChannel` desde `../utils/websocket.js`:
+   ```typescript
+   import { sendCommandToFigma, joinChannel } from "../utils/websocket.js";
+   ```
+3. Se reemplazó la implementación anterior de la herramienta `join_channel` con la versión corregida
+
+4. También se corrigió un problema adicional relacionado con las extensiones de archivo en las importaciones:
+   - Se agregó la extensión `.js` a todas las importaciones relativas para cumplir con los requisitos del sistema de módulos TypeScript configurado como "node16" o "nodenext".
 
 ## Impacto del Cambio
 
-Este cambio garantizará que:
-- La variable `currentChannel` se actualice correctamente después de unirse a un canal
-- Todas las herramientas subsiguientes puedan enviar comandos a Figma correctamente
-- Se mantenga la consistencia en cómo se manejan los canales en todo el código
+Este cambio garantiza que:
+- La variable `currentChannel` se actualiza correctamente después de unirse a un canal
+- Todas las herramientas subsiguientes pueden enviar comandos a Figma correctamente
+- Se mantiene la consistencia en cómo se manejan los canales en todo el código
 
 ## Estado de Validación
 
-- [ ] Cambio implementado
-- [ ] Pruebas realizadas
-- [ ] Funcionalidad verificada
+- [x] Cambio implementado
+- [x] Pruebas realizadas
+- [x] Funcionalidad verificada
+
+## Lecciones Aprendidas
+
+Este problema resalta la importancia de:
+
+1. **Encapsulamiento adecuado**: El estado del canal debería estar completamente encapsulado en el módulo websocket.
+2. **Consistencia en la implementación**: Usar siempre las funciones de alto nivel que manejan tanto la comunicación como el estado.
+3. **Separación de responsabilidades**: La herramienta debe usar los métodos de utilidad proporcionados para tareas específicas.
+
+El enfoque de modularización adoptado en la refactorización ha facilitado la identificación y solución de este problema al hacer más explícitas las dependencias entre módulos.

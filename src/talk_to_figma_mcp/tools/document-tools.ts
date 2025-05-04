@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { sendCommandToFigma } from "../utils/websocket";
-import { filterFigmaNode } from "../utils/figma-helpers";
+import { sendCommandToFigma, joinChannel } from "../utils/websocket.js";
+import { filterFigmaNode } from "../utils/figma-helpers.js";
 
 /**
  * Register document-related tools to the MCP server
@@ -321,7 +321,9 @@ export function registerDocumentTools(server: McpServer): void {
           };
         }
 
-        await sendCommandToFigma("join", { channel: channel });
+        // Use joinChannel instead of sendCommandToFigma to ensure currentChannel is updated
+        await joinChannel(channel);
+        
         return {
           content: [
             {
