@@ -764,25 +764,65 @@ async function createComponentInstance(params) {
   }
 
   try {
-    const component = await figma.importComponentByKeyAsync(componentKey);
-    const instance = component.createInstance();
+    // Set up a manual timeout to detect long operations
+    let timeoutId;
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error("Timeout while creating component instance (10s). The component may be too complex or unavailable."));
+      }, 10000); // 10 seconds timeout
+    });
+    
+    console.log(`Starting component import for key: ${componentKey}...`);
+    
+    // Execute the import with a timeout
+    const importPromise = figma.importComponentByKeyAsync(componentKey);
+    
+    // Use Promise.race to implement the timeout
+    const component = await Promise.race([importPromise, timeoutPromise])
+      .finally(() => {
+        clearTimeout(timeoutId); // Clear the timeout to prevent memory leaks
+      });
 
-    instance.x = x;
-    instance.y = y;
+    // Add progress logging
+    console.log(`Component imported successfully, creating instance...`);
+    
+    // Create instance and set properties in a separate try block to handle errors specifically from this step
+    try {
+      const instance = component.createInstance();
+      instance.x = x;
+      instance.y = y;
 
-    figma.currentPage.appendChild(instance);
+      figma.currentPage.appendChild(instance);
+      
+      console.log(`Component instance created and added to page successfully`);
 
-    return {
-      id: instance.id,
-      name: instance.name,
-      x: instance.x,
-      y: instance.y,
-      width: instance.width,
-      height: instance.height,
-      componentId: instance.componentId,
-    };
+      return {
+        id: instance.id,
+        name: instance.name,
+        x: instance.x,
+        y: instance.y,
+        width: instance.width,
+        height: instance.height,
+        componentId: instance.componentId,
+      };
+    } catch (instanceError) {
+      console.error(`Error creating component instance: ${instanceError.message}`);
+      throw new Error(`Error creating component instance: ${instanceError.message}`);
+    }
   } catch (error) {
-    throw new Error(`Error creating component instance: ${error.message}`);
+    console.error(`Detailed error creating component instance: ${error.message || "Unknown error"}`);
+    console.error(`Stack trace: ${error.stack || "Not available"}`);
+    
+    // Provide more helpful error messages for common failure scenarios
+    if (error.message.includes("timeout") || error.message.includes("Timeout")) {
+      throw new Error(`The component import timed out after 10 seconds. This usually happens with complex remote components or network issues. Try again later or use a simpler component.`);
+    } else if (error.message.includes("not found") || error.message.includes("Not found")) {
+      throw new Error(`Component with key "${componentKey}" not found. Make sure the component exists and is accessible in your document or team libraries.`);
+    } else if (error.message.includes("permission") || error.message.includes("Permission")) {
+      throw new Error(`You don't have permission to use this component. Make sure you have access to the team library containing this component.`);
+    } else {
+      throw new Error(`Error creating component instance: ${error.message}`);
+    }
   }
 }
 
@@ -2362,21 +2402,13 @@ async function getRemoteComponents() {
     // Check if figma.teamLibrary is available
     if (!figma.teamLibrary) {
       console.error("Error: figma.teamLibrary API is not available");
-      return {
-        error: true,
-        message: "The figma.teamLibrary API is not available in this context",
-        apiAvailable: false
-      };
+      throw new Error("The figma.teamLibrary API is not available in this context");
     }
     
     // Check if figma.teamLibrary.getAvailableComponentsAsync exists
     if (!figma.teamLibrary.getAvailableComponentsAsync) {
       console.error("Error: figma.teamLibrary.getAvailableComponentsAsync is not available");
-      return {
-        error: true,
-        message: "The getAvailableComponentsAsync method is not available",
-        apiAvailable: false
-      };
+      throw new Error("The getAvailableComponentsAsync method is not available");
     }
     
     console.log("Starting remote components retrieval...");
@@ -2414,13 +2446,8 @@ async function getRemoteComponents() {
     console.error(`Detailed error retrieving remote components: ${error.message || "Unknown error"}`);
     console.error(`Stack trace: ${error.stack || "Not available"}`);
     
-    return {
-      error: true,
-      message: `Error retrieving remote components: ${error.message}`,
-      stack: error.stack,
-      apiAvailable: true,
-      methodExists: true
-    };
+    // Instead of returning an error object, throw an exception with the error message
+    throw new Error(`Error retrieving remote components: ${error.message}`);
   }
 }
 
@@ -2503,35 +2530,75 @@ async function setEffectStyleId(params) {
     throw new Error("Missing effectStyleId parameter");
   }
   
-  const node = await figma.getNodeByIdAsync(nodeId);
-  if (!node) {
-    throw new Error(`Node not found with ID: ${nodeId}`);
-  }
-  
-  if (!("effectStyleId" in node)) {
-    throw new Error(`Node does not support effect styles: ${nodeId}`);
-  }
-  
   try {
-    // Try to find the effect style by ID
-    const effectStyles = await figma.getLocalEffectStylesAsync();
-    const foundStyle = effectStyles.find(style => style.id === effectStyleId);
+    // Set up a manual timeout to detect long operations
+    let timeoutId;
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error("Timeout while setting effect style ID (8s). The operation took too long to complete."));
+      }, 8000); // 8 seconds timeout
+    });
     
-    if (!foundStyle) {
-      throw new Error(`Effect style not found with ID: ${effectStyleId}`);
-    }
+    console.log(`Starting to set effect style ID ${effectStyleId} on node ${nodeId}...`);
     
-    // Apply the effect style to the node
-    node.effectStyleId = effectStyleId;
+    // Get node and validate in a promise
+    const nodePromise = (async () => {
+      const node = await figma.getNodeByIdAsync(nodeId);
+      if (!node) {
+        throw new Error(`Node not found with ID: ${nodeId}`);
+      }
+      
+      if (!("effectStyleId" in node)) {
+        throw new Error(`Node with ID ${nodeId} does not support effect styles`);
+      }
+      
+      // Try to validate the effect style exists before applying
+      console.log(`Fetching effect styles to validate style ID: ${effectStyleId}`);
+      const effectStyles = await figma.getLocalEffectStylesAsync();
+      const foundStyle = effectStyles.find(style => style.id === effectStyleId);
+      
+      if (!foundStyle) {
+        throw new Error(`Effect style not found with ID: ${effectStyleId}. Available styles: ${effectStyles.length}`);
+      }
+      
+      console.log(`Effect style found, applying to node...`);
+      
+      // Apply the effect style to the node
+      node.effectStyleId = effectStyleId;
+      
+      return {
+        id: node.id,
+        name: node.name,
+        effectStyleId: node.effectStyleId,
+        appliedEffects: node.effects
+      };
+    })();
     
-    return {
-      id: node.id,
-      name: node.name,
-      effectStyleId: node.effectStyleId,
-      appliedEffects: node.effects
-    };
+    // Race between the node operation and the timeout
+    const result = await Promise.race([nodePromise, timeoutPromise])
+      .finally(() => {
+        // Clear the timeout to prevent memory leaks
+        clearTimeout(timeoutId);
+      });
+    
+    console.log(`Successfully set effect style ID on node ${nodeId}`);
+    return result;
   } catch (error) {
-    throw new Error(`Error setting effect style ID: ${error.message}`);
+    console.error(`Error setting effect style ID: ${error.message || "Unknown error"}`);
+    console.error(`Stack trace: ${error.stack || "Not available"}`);
+    
+    // Proporcionar mensajes de error específicos para diferentes casos
+    if (error.message.includes("timeout") || error.message.includes("Timeout")) {
+      throw new Error(`The operation timed out after 8 seconds. This could happen with complex nodes or effects. Try with a simpler node or effect style.`);
+    } else if (error.message.includes("not found") && error.message.includes("Node")) {
+      throw new Error(`Node with ID "${nodeId}" not found. Make sure the node exists in the current document.`);
+    } else if (error.message.includes("not found") && error.message.includes("style")) {
+      throw new Error(`Effect style with ID "${effectStyleId}" not found. Make sure the style exists in your local styles.`);
+    } else if (error.message.includes("does not support")) {
+      throw new Error(`The selected node type does not support effect styles. Only certain node types like frames, components, and instances can have effect styles.`);
+    } else {
+      throw new Error(`Error setting effect style ID: ${error.message}`);
+    }
   }
 }
 
@@ -2632,7 +2699,6 @@ async function flattenNode(params) {
     }
     
     // Check for specific node types that can be flattened
-    // Only certain node types like VECTOR, BOOLEAN_OPERATION, or STAR can be flattened
     const flattenableTypes = ["VECTOR", "BOOLEAN_OPERATION", "STAR", "POLYGON", "ELLIPSE", "RECTANGLE"];
     
     if (!flattenableTypes.includes(node.type)) {
@@ -2644,8 +2710,36 @@ async function flattenNode(params) {
       throw new Error(`Node with ID ${nodeId} does not support the flatten operation.`);
     }
     
-    // Flatten the node
-    const flattened = node.flatten();
+    // Implement a timeout mechanism
+    let timeoutId;
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error("Flatten operation timed out after 8 seconds. The node may be too complex."));
+      }, 8000); // 8 seconds timeout
+    });
+    
+    // Execute the flatten operation in a promise
+    const flattenPromise = new Promise((resolve, reject) => {
+      // Execute in the next tick to allow UI updates
+      setTimeout(() => {
+        try {
+          console.log(`Starting flatten operation for node ID ${nodeId}...`);
+          const flattened = node.flatten();
+          console.log(`Flatten operation completed successfully for node ID ${nodeId}`);
+          resolve(flattened);
+        } catch (err) {
+          console.error(`Error during flatten operation: ${err.message}`);
+          reject(err);
+        }
+      }, 0);
+    });
+    
+    // Race between the timeout and the operation
+    const flattened = await Promise.race([flattenPromise, timeoutPromise])
+      .finally(() => {
+        // Clear the timeout to prevent memory leaks
+        clearTimeout(timeoutId);
+      });
     
     return {
       id: flattened.id,
@@ -2654,7 +2748,12 @@ async function flattenNode(params) {
     };
   } catch (error) {
     console.error(`Error in flattenNode: ${error.message}`);
-    throw new Error(`Error flattening node: ${error.message}`);
+    if (error.message.includes("timed out")) {
+      // Provide a more helpful message for timeout errors
+      throw new Error(`The flatten operation timed out. This usually happens with complex nodes. Try simplifying the node first or breaking it into smaller parts.`);
+    } else {
+      throw new Error(`Error flattening node: ${error.message}`);
+    }
   }
 }
 
