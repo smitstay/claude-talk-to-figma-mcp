@@ -15,6 +15,9 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
 - **Fluid Experience**: Design with AI as your assistant, accelerating creative workflows
 - **Text Scanning**: Identify and manipulate text nodes within Figma documents
 - **Remote Components**: Access and utilize components from team libraries
+- **Modular Architecture**: Clean separation of concerns with specialized tool modules
+- **Enhanced Error Handling**: Robust timeout and error recovery mechanisms
+- **Performance Optimizations**: Improved handling of complex operations with chunking and batching
 
 ## 📋 Prerequisites
 
@@ -119,93 +122,111 @@ Once installed, you just need to start it:
 +----------------+     +-------+     +---------------+     +---------------+
 ```
 
+### Modular Structure
+
+The codebase follows a clean, modular architecture:
+
+```
+src/
+  talk_to_figma_mcp/     # MCP Server implementation
+    server.ts            # Main entry point
+    config/              # Server configuration
+    tools/               # Modular tool categories
+      index.ts           # Tool registration
+      document-tools.ts  # Document interaction tools
+      creation-tools.ts  # Shape and element creation tools
+      modification-tools.ts # Property modification tools
+      text-tools.ts      # Text manipulation tools
+      component-tools.ts # Component handling tools
+    utils/               # Shared utilities
+      websocket.ts       # WebSocket communication
+      logger.ts          # Logging system
+      figma-helpers.ts   # Figma-specific helpers
+    types/               # TypeScript type definitions
+  claude_mcp_plugin/     # Figma plugin
+    code.js              # Plugin implementation
+    manifest.json        # Plugin configuration
+    ui.html              # Plugin UI
+```
+
+This modular design provides several benefits:
+- **Maintainability**: Each tool category is isolated in its own file
+- **Scalability**: New tools can be added without modifying existing code
+- **Code Navigation**: Easier to find and understand specific functionality
+- **Testing**: Simplified unit testing of individual components
+
 ## 🛠️ Available Commands
 
 As Claude is connected to our MCP, it already knows the list of tools to manipulate Figma. But if you want, you can mention them in your prompts:  
 
-### Basic Commands
-- `clone_node`  
-  Clone an existing node in Figma
-- `create_component_instance`  
-  Create an instance of a component in Figma
-- `create_ellipse`  
-  Create a new ellipse or circle in Figma
-- `create_frame`  
-  Create a new frame in Figma
-- `create_line`  
-  Create a new line in Figma
-- `create_polygon`  
-  Create a new polygon with customizable sides in Figma
-- `create_rectangle`  
-  Create a new rectangle in Figma
-- `create_star`  
-  Create a new star with customizable points in Figma
-- `create_text`  
-  Create a new text element in Figma
-- `create_vector`  
-  Create a new vector shape in Figma
-- `delete_node`  
-  Delete a node from Figma
-- `export_node_as_image`  
-  Export a node as an image from Figma
-- `get_document_info`  
-  Get detailed information about the current Figma document
-- `get_local_components`  
-  Get all local components from the Figma document
-- `get_node_info`  
-  Get detailed information about a specific node in Figma
-- `get_nodes_info`  
-  Get detailed information about multiple nodes in Figma
-- `get_selection`  
-  Get information about the current selection in Figma
-- `get_styles`  
-  Get all styles from the current Figma document
-- `join_channel`  
-  Join a specific channel to communicate with Figma
-- `move_node`  
-  Move a node to a new position in Figma
-- `resize_node`  
-  Resize a node in Figma
-- `scan_text_nodes`  
-  Scan all text nodes in the selected Figma node
-- `set_corner_radius`  
-  Set the corner radius of a node in Figma
-- `set_fill_color`  
-  Set the fill color of a node in Figma can be TextNode or FrameNode
-- `set_multiple_text_contents`  
-  Set multiple text contents parallelly in a node
-- `set_stroke_color`  
-  Set the stroke color of a node in Figma
-- `set_auto_layout`  
-  Configure auto layout properties for a node in Figma
-- `set_text_content`  
-  Set the text content of an existing text node in Figma
+### Document Tools
+- `get_document_info`: Get detailed information about the current Figma document
+- `get_selection`: Get information about the current selection in Figma
+- `get_node_info`: Get detailed information about a specific node in Figma
+- `get_nodes_info`: Get detailed information about multiple nodes in Figma
+- `get_styles`: Get all styles from the current Figma document
+- `get_local_components`: Get all local components from the Figma document
+- `get_remote_components`: Get available components from team libraries in Figma
+- `scan_text_nodes`: Scan all text nodes in the selected Figma node
+- `join_channel`: Join a specific channel to communicate with Figma
+- `export_node_as_image`: Export a node as an image from Figma
 
-### Text and Font Commands
-- `set_font_name`  
-  Set the font name and style of a text node in Figma (e.g., "Arial", "Bold")
-- `set_font_size`  
-  Set the font size of a text node in Figma (in pixels)
-- `set_font_weight`  
-  Set the font weight of a text node in Figma (100-900)
-- `set_letter_spacing`  
-  Set the letter spacing of a text node in Figma (in pixels or percentage)
-- `set_line_height`  
-  Set the line height of a text node in Figma (in pixels, percentage, or auto)
-- `set_paragraph_spacing`  
-  Set the paragraph spacing of a text node in Figma (in pixels)
-- `set_text_case`  
-  Set the text case of a text node in Figma (ORIGINAL, UPPER, LOWER, TITLE)
-- `set_text_decoration`  
-  Set the text decoration of a text node in Figma (NONE, UNDERLINE, STRIKETHROUGH)
-- `get_styled_text_segments`  
-  Get text segments with specific styling in a text node (by fontName, fontSize, etc.)
-- `load_font_async`  
-  Load a font asynchronously in Figma
-- `get_remote_components`  
-  Get available components from team libraries in Figma
+### Creation Tools
+- `create_rectangle`: Create a new rectangle in Figma
+- `create_frame`: Create a new frame in Figma
+- `create_text`: Create a new text element in Figma
+- `create_ellipse`: Create a new ellipse or circle in Figma
+- `create_polygon`: Create a new polygon with customizable sides in Figma
+- `create_star`: Create a new star with customizable points in Figma
+- `create_vector`: Create a new vector shape in Figma
+- `create_line`: Create a new line in Figma
+- `group_nodes`: Group multiple nodes together in Figma
+- `ungroup_nodes`: Ungroup nodes in Figma
+- `clone_node`: Clone an existing node in Figma
+- `insert_child`: Insert a child node inside a parent node in Figma
+- `flatten_node`: Flatten a node in Figma (e.g., for boolean operations)
+
+### Modification Tools
+- `set_fill_color`: Set the fill color of a node in Figma
+- `set_stroke_color`: Set the stroke color of a node in Figma
+- `move_node`: Move a node to a new position in Figma
+- `resize_node`: Resize a node in Figma
+- `delete_node`: Delete a node from Figma
+- `set_corner_radius`: Set the corner radius of a node in Figma
+- `set_auto_layout`: Configure auto layout properties for a node in Figma
+- `set_effects`: Set visual effects (shadows, blurs) for a node in Figma
+- `set_effect_style_id`: Apply an effect style to a node in Figma
+
+### Text Tools
+- `set_text_content`: Set the text content of an existing text node in Figma
+- `set_multiple_text_contents`: Set multiple text contents parallelly in a node
+- `set_font_name`: Set the font name and style of a text node in Figma
+- `set_font_size`: Set the font size of a text node in Figma
+- `set_font_weight`: Set the font weight of a text node in Figma
+- `set_letter_spacing`: Set the letter spacing of a text node in Figma
+- `set_line_height`: Set the line height of a text node in Figma
+- `set_paragraph_spacing`: Set the paragraph spacing of a text node in Figma
+- `set_text_case`: Set the text case of a text node in Figma
+- `set_text_decoration`: Set the text decoration of a text node in Figma
+- `get_styled_text_segments`: Get text segments with specific styling in a text node
+- `load_font_async`: Load a font asynchronously in Figma
+
+### Component Tools
+- `create_component_instance`: Create an instance of a component in Figma
 
 ## 📝 CHANGELOG
+
+### 0.5.0
+- **Major code refactoring**: Implemented modular tool structure for better maintainability
+- **Performance improvements**: 
+  - Enhanced handling of complex operations with timeouts and chunking
+  - Improved error handling and recovery for all tools
+- **Fixes for specific tools**:
+  - Fixed channel connection issues with improved state management
+  - Resolved timeout problems in `flatten_node`, `create_component_instance`, and `set_effect_style_id`
+  - Enhanced remote component access with better error handling
+- **Documentation**: Comprehensive documentation of tool categories and capabilities
+- **Code quality**: Improved TypeScript typing and standardized error handling
 
 ### 0.4.0
 - Added new tools for creating advanced shapes:

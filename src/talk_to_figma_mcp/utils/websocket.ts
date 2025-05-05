@@ -8,12 +8,12 @@ import { FigmaCommand, FigmaResponse, CommandProgressUpdate, PendingRequest, Pro
 let ws: WebSocket | null = null;
 let currentChannel: string | null = null;
 
-// Mapa de solicitudes pendientes para seguimiento de promesas
+// Map of pending requests for promise tracking
 const pendingRequests = new Map<string, PendingRequest>();
 
 /**
- * Conecta con el servidor de Figma mediante WebSocket.
- * @param port - Puerto opcional para la conexión (por defecto usa defaultPort de config)
+ * Connects to the Figma server via WebSocket.
+ * @param port - Optional port for the connection (defaults to defaultPort from config)
  */
 export function connectToFigma(port: number = defaultPort) {
   // If already connected, do nothing
@@ -162,9 +162,9 @@ export function connectToFigma(port: number = defaultPort) {
 }
 
 /**
- * Unirse a un canal específico en Figma.
- * @param channelName - Nombre del canal al que unirse
- * @returns Promesa que se resuelve cuando se ha unido al canal
+ * Join a specific channel in Figma.
+ * @param channelName - Name of the channel to join
+ * @returns Promise that resolves when successfully joined the channel
  */
 export async function joinChannel(channelName: string): Promise<void> {
   if (!ws || ws.readyState !== WebSocket.OPEN) {
@@ -182,19 +182,19 @@ export async function joinChannel(channelName: string): Promise<void> {
 }
 
 /**
- * Obtener el canal actual al que está conectado.
- * @returns El nombre del canal actual o null si no está conectado a ningún canal
+ * Get the current channel the connection is joined to.
+ * @returns The current channel name or null if not connected to any channel
  */
 export function getCurrentChannel(): string | null {
   return currentChannel;
 }
 
 /**
- * Envía un comando a Figma a través de WebSocket.
- * @param command - El comando a enviar
- * @param params - Parámetros adicionales para el comando
- * @param timeoutMs - Tiempo de espera en milisegundos antes de fallar
- * @returns Una promesa que se resuelve con la respuesta de Figma
+ * Send a command to Figma via WebSocket.
+ * @param command - The command to send
+ * @param params - Additional parameters for the command
+ * @param timeoutMs - Timeout in milliseconds before failing
+ * @returns A promise that resolves with the Figma response
  */
 export function sendCommandToFigma(
   command: FigmaCommand,
