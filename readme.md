@@ -84,7 +84,7 @@ Once installed, you just need to start it:
    ```
    Verify it's running with `http://localhost:3055/status`
    
-   > **Note**: To stop the server, press `Ctrl+C` in the terminal.
+   > **Note**: if for any reason you need to stop the server, press `Ctrl+C` in the terminal.
 
 3. **Connect the plugin to the server**:
 
