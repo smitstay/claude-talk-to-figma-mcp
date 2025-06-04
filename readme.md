@@ -44,14 +44,17 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop to interact dir
 3. Build the project:
 
    Run the appropriate command based on your operating system:
+   - **macOs / Linux**
+   
+    ```bash
+   bun run build
+   ```
+
    - **Windows**
    ```bash
    bun run build:win
    ```
-   - **macOs / Linux**
-   ```bash
-   bun run build:unix
-   ```
+
 
 4. Configure the MCP in Claude Desktop:
    ```bash
