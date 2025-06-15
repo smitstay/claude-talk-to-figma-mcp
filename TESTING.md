@@ -1,6 +1,13 @@
 # Testing Guide for Claude Talk to Figma MCP
 
-This document provides a detailed guide for testing the integration between Claude Desktop and Figma, as well as solutions to common problems.
+This document provides a detailed guide for testing the Claude Talk to Figma MCP project, including both automated tests and manual integration tests.
+
+## Testing Approaches
+
+The project uses two complementary testing approaches:
+
+1. **Automated Tests**: Unit and component integration tests using Jest
+2. **Manual Integration Tests**: End-to-end tests for the complete Claude-MCP-Figma workflow
 
 ## Prerequisites
 
@@ -10,6 +17,55 @@ Before starting the tests, make sure you have:
 - Figma account with plugin creation access
 - Bun installed (v1.0.0 or higher)
 - Permissions to install plugins in Figma
+
+## Automated Tests
+
+### Running Automated Tests
+
+```bash
+# Run all automated tests
+bun run test
+
+# Run in watch mode (re-runs on file changes)
+bun run test:watch
+
+# Run with coverage report
+bun run test:coverage
+```
+
+### Test Categories
+
+1. **Unit Tests** (`tests/unit/`):
+   - Test individual functions and utilities in isolation
+   - Verify edge cases and error handling
+   - Example: `defaults.test.ts` - Tests the proper handling of falsy values
+
+2. **Integration Tests** (`tests/integration/`):
+   - Test interactions between multiple components
+   - Verify that components work together correctly
+   - Example: `set-fill-color.test.ts` - Tests the opacity handling in fill colors
+
+### Adding New Tests
+
+1. For unit tests:
+   - Create a file in the appropriate directory under `tests/unit/`
+   - Name the file `*.test.ts` to be detected by Jest
+
+2. For integration tests:
+   - Create a file in the `tests/integration/` directory
+   - Use the test fixtures in `tests/fixtures/` for test data
+
+## Manual Integration Tests
+
+These tests verify the complete end-to-end workflow between Claude Desktop, the MCP server, and Figma.
+
+### Running Integration Tests
+
+```bash
+bun run test:integration
+```
+
+This script will guide you through the complete testing process.
 
 ## Test Cases
 
@@ -146,4 +202,15 @@ Claude should be able to communicate with Figma and return information about the
 - [ ] Claude Desktop can modify existing elements
 - [ ] Claude Desktop can scan and modify text
 - [ ] The system recovers correctly from disconnections
-- [ ] Errors are handled and reported correctly 
+- [ ] Errors are handled and reported correctly
+- [ ] Automated tests pass successfully
+- [ ] Set fill color handles transparency correctly
+
+## Troubleshooting Automated Tests
+
+| Problem | Possible cause | Solution |
+| -------- | ------------- | -------- |
+| Jest tests fail to run | Missing dependencies | Run `bun install` to install all dependencies |
+| Test timeouts | Slow machine or heavy CPU load | Increase timeout in Jest configuration |
+| Mocks not working | Incorrect import paths | Verify mock paths match actual module paths |
+| Type errors in tests | TypeScript configuration issue | Check `tsconfig.json` and Jest TypeScript settings |
