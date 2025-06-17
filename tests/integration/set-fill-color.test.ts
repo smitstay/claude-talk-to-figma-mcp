@@ -52,7 +52,6 @@ describe("set_fill_color tool integration", () => {
         // a is undefined
       });
 
-      // Verify WebSocket was called with correct payload
       expect(mockSendCommand).toHaveBeenCalledTimes(1);
       const [command, payload] = mockSendCommand.mock.calls[0];
       expect(command).toBe("set_fill_color");
@@ -61,7 +60,6 @@ describe("set_fill_color tool integration", () => {
         color: { r: 0.2, g: 0.4, b: 0.6, a: 1 },
       });
 
-      // Verify response message
       expect(response.content[0].text).toContain("RGBA(0.2, 0.4, 0.6, 1)");
     });
 
@@ -74,12 +72,10 @@ describe("set_fill_color tool integration", () => {
         a: 0, // This should be preserved as 0, not converted to 1
       });
 
-      // Verify WebSocket payload preserves opacity 0
       expect(mockSendCommand).toHaveBeenCalledTimes(1);
       const [command, payload] = mockSendCommand.mock.calls[0];
       expect(payload.color.a).toBe(0); // Critical: should be 0, not 1
 
-      // Verify response message shows 0
       expect(response.content[0].text).toContain("RGBA(0.1, 0.3, 0.5, 0)");
     });
 

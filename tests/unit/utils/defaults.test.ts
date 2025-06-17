@@ -69,7 +69,6 @@ describe('defaults utilities', () => {
         
         expect(result).toEqual(expected);
         
-        // Ensure RGB values are preserved exactly
         expect(result.r).toBe(input.r);
         expect(result.g).toBe(input.g);
         expect(result.b).toBe(input.b);

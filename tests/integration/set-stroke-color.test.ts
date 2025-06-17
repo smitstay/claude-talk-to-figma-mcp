@@ -53,7 +53,6 @@ describe("set_stroke_color tool integration", () => {
         strokeWeight: 2,
       });
 
-      // Verify WebSocket was called with correct payload
       expect(mockSendCommand).toHaveBeenCalledTimes(1);
       const [command, payload] = mockSendCommand.mock.calls[0];
       expect(command).toBe("set_stroke_color");
@@ -63,7 +62,6 @@ describe("set_stroke_color tool integration", () => {
         strokeWeight: 2,
       });
 
-      // Verify response message
       expect(response.content[0].text).toContain("RGBA(0.2, 0.4, 0.6, 1)");
       expect(response.content[0].text).toContain("weight 2");
     });
@@ -78,13 +76,11 @@ describe("set_stroke_color tool integration", () => {
         strokeWeight: 1.5,
       });
 
-      // Verify WebSocket payload preserves opacity 0
       expect(mockSendCommand).toHaveBeenCalledTimes(1);
       const [command, payload] = mockSendCommand.mock.calls[0];
-      expect(payload.color.a).toBe(0); // Critical: should be 0, not 1
+      expect(payload.color.a).toBe(0);
       expect(payload.strokeWeight).toBe(1.5);
 
-      // Verify response message shows 0
       expect(response.content[0].text).toContain("RGBA(0.1, 0.3, 0.5, 0)");
       expect(response.content[0].text).toContain("weight 1.5");
     });
@@ -226,7 +222,6 @@ describe("set_stroke_color tool integration", () => {
         strokeWeight: 1,
       })).rejects.toThrow();
       
-      // WebSocket should not be called if validation fails
       expect(mockSendCommand).not.toHaveBeenCalled();
     });
 
