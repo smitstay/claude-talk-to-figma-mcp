@@ -68,9 +68,9 @@ export function registerModificationTools(server: McpServer): void {
       g: z.number().min(0).max(1).describe("Green component (0-1)"),
       b: z.number().min(0).max(1).describe("Blue component (0-1)"),
       a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)"),
-      weight: z.number().positive().optional().describe("Stroke weight"),
+      strokeWeight: z.number().positive().optional().describe("Stroke weight"),
     },
-    async ({ nodeId, r, g, b, a, weight }) => {
+    async ({ nodeId, r, g, b, a, strokeWeight }) => {
       try {
 
         if (r === undefined || g === undefined || b === undefined) {
@@ -80,19 +80,19 @@ export function registerModificationTools(server: McpServer): void {
         const colorInput: Color = { r, g, b, a };
         const colorWithDefaults = applyColorDefaults(colorInput);
         
-        const strokeWeight = applyDefault(weight, FIGMA_DEFAULTS.stroke.weight);
+        const strokeWeightWithDefault = applyDefault(strokeWeight, FIGMA_DEFAULTS.stroke.weight);
         
         const result = await sendCommandToFigma("set_stroke_color", {
           nodeId,
           color: colorWithDefaults,
-          weight: strokeWeight,
+          strokeWeight: strokeWeightWithDefault,
         });
         const typedResult = result as { name: string };
         return {
           content: [
             {
               type: "text",
-              text: `Set stroke color of node "${typedResult.name}" to RGBA(${r}, ${g}, ${b}, ${colorWithDefaults.a}) with weight ${strokeWeight}`,
+              text: `Set stroke color of node "${typedResult.name}" to RGBA(${r}, ${g}, ${b}, ${colorWithDefaults.a}) with weight ${strokeWeightWithDefault}`,
             },
           ],
         };
