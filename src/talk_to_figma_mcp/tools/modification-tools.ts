@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { sendCommandToFigma } from "../utils/websocket";
-import { applyColorDefaults } from "../utils/defaults";
+import { applyColorDefaults, applyDefault, FIGMA_DEFAULTS } from "../utils/defaults";
 import { Color } from "../types/color";
 
 /**
@@ -61,7 +61,7 @@ export function registerModificationTools(server: McpServer): void {
   // Set Stroke Color Tool
   server.tool(
     "set_stroke_color",
-    "Set the stroke color of a node in Figma",
+    "Set the stroke color of a node in Figma (defaults: opacity 1, weight 1)",
     {
       nodeId: z.string().describe("The ID of the node to modify"),
       r: z.number().min(0).max(1).describe("Red component (0-1)"),
@@ -72,17 +72,27 @@ export function registerModificationTools(server: McpServer): void {
     },
     async ({ nodeId, r, g, b, a, weight }) => {
       try {
+
+        if (r === undefined || g === undefined || b === undefined) {
+          throw new Error("RGB components (r, g, b) are required and cannot be undefined");
+        }
+        
+        const colorInput: Color = { r, g, b, a };
+        const colorWithDefaults = applyColorDefaults(colorInput);
+        
+        const strokeWeight = applyDefault(weight, FIGMA_DEFAULTS.stroke.weight);
+        
         const result = await sendCommandToFigma("set_stroke_color", {
           nodeId,
-          color: { r, g, b, a: a || 1 },
-          weight: weight || 1,
+          color: colorWithDefaults,
+          weight: strokeWeight,
         });
         const typedResult = result as { name: string };
         return {
           content: [
             {
               type: "text",
-              text: `Set stroke color of node "${typedResult.name}" to RGBA(${r}, ${g}, ${b}, ${a || 1}) with weight ${weight || 1}`,
+              text: `Set stroke color of node "${typedResult.name}" to RGBA(${r}, ${g}, ${b}, ${colorWithDefaults.a}) with weight ${strokeWeight}`,
             },
           ],
         };
