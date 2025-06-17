@@ -105,6 +105,33 @@ describe('defaults utilities', () => {
       expect(FIGMA_DEFAULTS).toHaveProperty('color');
       expect(FIGMA_DEFAULTS.color).toHaveProperty('opacity');
       expect(typeof FIGMA_DEFAULTS.color.opacity).toBe('number');
+
+      expect(FIGMA_DEFAULTS).toHaveProperty('fill');
+      expect(FIGMA_DEFAULTS.fill).toHaveProperty('white');
+      expect(FIGMA_DEFAULTS.fill).toHaveProperty('black');
+    });
+
+    it('should have correct default fill colors', () => {
+      expect(FIGMA_DEFAULTS.fill.white).toEqual({ r: 1, g: 1, b: 1, a: 1 });
+      expect(FIGMA_DEFAULTS.fill.black).toEqual({ r: 0, g: 0, b: 0, a: 1 });
+    });
+
+  });
+
+  describe('applyDefault with shape property scenarios', () => {
+    it('should preserve innerRadius 0 (sharp star points)', () => {
+      const result = applyDefault(0, FIGMA_DEFAULTS.shape.star.innerRadius);
+      expect(result).toBe(0);
+    });
+
+    it('should default undefined innerRadius to 0.5', () => {
+      const result = applyDefault(undefined, FIGMA_DEFAULTS.shape.star.innerRadius);
+      expect(result).toBe(0.5);
+    });
+
+    it('should preserve custom innerRadius values', () => {
+      const result = applyDefault(0.8, FIGMA_DEFAULTS.shape.star.innerRadius);
+      expect(result).toBe(0.8);
     });
   });
 });

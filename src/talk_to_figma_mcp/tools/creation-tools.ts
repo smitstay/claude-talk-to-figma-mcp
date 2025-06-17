@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { sendCommandToFigma } from "../utils/websocket";
+import { FIGMA_DEFAULTS, applyDefault } from "../utils/defaults";
 
 /**
  * Register creation tools to the MCP server
@@ -117,7 +118,7 @@ export function registerCreationTools(server: McpServer): void {
           height,
           name: name || "Frame",
           parentId,
-          fillColor: fillColor || { r: 1, g: 1, b: 1, a: 1 },
+          fillColor: fillColor ? fillColor : FIGMA_DEFAULTS.fill.white,
           strokeColor: strokeColor,
           strokeWeight: strokeWeight,
         });
@@ -187,7 +188,7 @@ export function registerCreationTools(server: McpServer): void {
           text,
           fontSize: fontSize || 14,
           fontWeight: fontWeight || 400,
-          fontColor: fontColor || { r: 0, g: 0, b: 0, a: 1 },
+          fontColor: fontColor ? fontColor : FIGMA_DEFAULTS.fill.black,
           name: name || "Text",
           parentId,
         });
@@ -319,7 +320,7 @@ export function registerCreationTools(server: McpServer): void {
           y,
           width,
           height,
-          sides: sides || 6,
+          sides: sides || FIGMA_DEFAULTS.shape.polygon.sides,
           name: name || "Polygon",
           parentId,
           fillColor,
@@ -389,8 +390,8 @@ export function registerCreationTools(server: McpServer): void {
           y,
           width,
           height,
-          points: points || 5,
-          innerRadius: innerRadius || 0.5,
+          points: points || FIGMA_DEFAULTS.shape.star.points,
+          innerRadius: applyDefault(innerRadius, FIGMA_DEFAULTS.shape.star.innerRadius),
           name: name || "Star",
           parentId,
           fillColor,

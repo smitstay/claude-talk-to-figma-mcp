@@ -3,6 +3,19 @@ import { Color, ColorWithDefaults } from '../types/color';
 export const FIGMA_DEFAULTS = {
   color: {
     opacity: 1,
+  },
+  fill: {
+    white: { r: 1, g: 1, b: 1, a: 1 },
+    black: { r: 0, g: 0, b: 0, a: 1 },
+  },
+  shape: {
+    polygon: {
+      sides: 6,
+    },
+    star: {
+      points: 5,
+      innerRadius: 0.5,
+    }
   }
 } as const;
 
