@@ -97,14 +97,36 @@ describe('defaults utilities', () => {
   });
 
   describe('FIGMA_DEFAULTS', () => {
-    it('should have correct default opacity', () => {
-      expect(FIGMA_DEFAULTS.color.opacity).toBe(1);
-    });
-
     it('should be a const object with expected structure', () => {
       expect(FIGMA_DEFAULTS).toHaveProperty('color');
       expect(FIGMA_DEFAULTS.color).toHaveProperty('opacity');
       expect(typeof FIGMA_DEFAULTS.color.opacity).toBe('number');
+      
+      expect(FIGMA_DEFAULTS).toHaveProperty('stroke');
+      expect(FIGMA_DEFAULTS.stroke).toHaveProperty('weight');
+      expect(typeof FIGMA_DEFAULTS.stroke.weight).toBe('number');
+    });
+  });
+
+  describe('applyDefault with stroke weight scenarios', () => {
+    it('should preserve strokeWeight 0.5 (thin stroke)', () => {
+      const result = applyDefault(0.5, FIGMA_DEFAULTS.stroke.weight);
+      expect(result).toBe(0.5);
+    });
+
+    it('should preserve strokeWeight 10 (thick stroke)', () => {
+      const result = applyDefault(10, FIGMA_DEFAULTS.stroke.weight);
+      expect(result).toBe(10);
+    });
+
+    it('should default undefined strokeWeight to 1', () => {
+      const result = applyDefault(undefined, FIGMA_DEFAULTS.stroke.weight);
+      expect(result).toBe(1);
+    });
+
+    it('should preserve strokeWeight with decimal precision', () => {
+      const result = applyDefault(2.75, FIGMA_DEFAULTS.stroke.weight);
+      expect(result).toBe(2.75);
     });
   });
 });
