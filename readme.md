@@ -227,10 +227,12 @@ As Claude is connected to our MCP, it already knows the list of tools to manipul
 
 See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 
-### Current version: 0.5.1
+### Current version: 0.5.2
 
-- **Bug fixes**: Improved opacity handling in colors and default values
-- **Internal improvements**: Automated tests, better TypeScript typing and code cleanup
+- **Critical Bug Fixes**: Fixed opacity and stroke weight handling in `set_stroke_color` where falsy values were incorrectly converted
+- **Architectural Improvements**: Extended safe defaults pattern across all color operations with consistent MCP/Plugin separation
+- **Enhanced Testing**: Comprehensive test coverage for stroke operations and edge cases
+- **Code Quality**: Improved type safety, validation, and error handling throughout the system
 
 For more details about previous and complete changes, check the [CHANGELOG.md](CHANGELOG.md).
 
@@ -286,7 +288,7 @@ Contributions are welcome. Please follow these steps:
 
 ### Contributors
 
-- **[Taylor Smits](https://github.com/smitstay)** - Fixed opacity handling in color functions and added automated tests ([PR #13](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/13))
+- **[Taylor Smits](https://github.com/smitstay)** - Fixed opacity handling in color functions and added automated tests ([PR #13](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/13), [PR #14](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/14))
 
 ## 📄 License
 

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] - 2025-01-19
+
+### Fixed
+- Fixed critical opacity handling bug in `set_stroke_color` where `a: 0` (transparent) was incorrectly converted to `a: 1` (opaque)
+- Fixed stroke weight handling where `strokeWeight: 0` (no border) was incorrectly converted to `strokeWeight: 1`
+- Resolved problematic `||` operator usage that affected falsy values in color and stroke operations
+
+### Added
+- Extended `applyDefault()` utility function to handle stroke weight defaults safely
+- Added `FIGMA_DEFAULTS.stroke.weight` constant for centralized stroke configuration
+- Comprehensive test suite for `set_stroke_color` covering edge cases and integration scenarios
+- Enhanced validation for RGB components in stroke operations
+
+### Changed
+- Improved architectural consistency by applying the same safe defaults pattern from `set_fill_color` to `set_stroke_color`
+- Enhanced separation of concerns between MCP layer (business logic) and Figma plugin (pure translator)
+- Renamed `weight` parameter to `strokeWeight` for better clarity and consistency
+- Updated Figma plugin to expect complete data from MCP layer instead of handling defaults internally
+
+### Technical Details
+- Replaced `strokeWeight: strokeWeight || 1` with `applyDefault(strokeWeight, FIGMA_DEFAULTS.stroke.weight)`
+- Enhanced type safety with proper `Color` and `ColorWithDefaults` interface usage
+- Improved error messages and validation for better debugging experience
+
 ## [0.5.1] - 2025-06-15
 
 ### Fixed
