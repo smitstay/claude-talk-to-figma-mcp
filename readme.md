@@ -76,33 +76,54 @@ Claude Desktop ↔ MCP Server ↔ WebSocket Server ↔ Figma Plugin
 | `get_document_info` | Document analysis | Get project overview |
 | `get_selection` | Current selection | What's selected now |
 | `get_node_info` | Element details | Inspect specific component |
+| `get_nodes_info` | Multiple elements info | Batch element inspection |
 | `scan_text_nodes` | Find all text | Text audit and updates |
+| `get_styles` | Document styles | Color/text style audit |
+| `join_channel` | Connect to Figma | Establish communication |
 | `export_node_as_image` | Asset export | Generate design assets |
 
 ### 🔧 Creation Tools
 | Command | Purpose | Example Use |
 |---------|---------|-------------|
-| `create_frame` | Layout containers | Page sections, cards |
 | `create_rectangle` | Basic shapes | Buttons, backgrounds |
+| `create_frame` | Layout containers | Page sections, cards |
 | `create_text` | Text elements | Headlines, labels |
 | `create_ellipse` | Circles/ovals | Profile pics, icons |
+| `create_polygon` | Multi-sided shapes | Custom geometric elements |
+| `create_star` | Star shapes | Decorative elements |
+| `clone_node` | Duplicate elements | Copy existing designs |
 | `group_nodes` | Organize elements | Component grouping |
+| `ungroup_nodes` | Separate groups | Break apart components |
+| `insert_child` | Nest elements | Hierarchical structure |
+| `flatten_node` | Vector operations | Boolean operations |
 
 ### ✏️ Modification Tools
 | Command | Purpose | Example Use |
 |---------|---------|-------------|
 | `set_fill_color` | Element colors | Brand color application |
+| `set_stroke_color` | Border colors | Outline styling |
 | `move_node` | Positioning | Layout adjustments |
 | `resize_node` | Size changes | Responsive scaling |
+| `delete_node` | Remove elements | Clean up designs |
+| `set_corner_radius` | Rounded corners | Modern UI styling |
 | `set_auto_layout` | Flexbox-like layout | Component spacing |
 | `set_effects` | Shadows/blurs | Visual polish |
+| `set_effect_style_id` | Apply effect styles | Consistent shadow styles |
 
 ### 📝 Text Tools
 | Command | Purpose | Example Use |
 |---------|---------|-------------|
 | `set_text_content` | Text updates | Copy changes |
+| `set_multiple_text_contents` | Batch text updates | Multi-element editing |
 | `set_font_name` | Typography | Brand font application |
 | `set_font_size` | Text sizing | Hierarchy creation |
+| `set_font_weight` | Text weight | Bold/light variations |
+| `set_letter_spacing` | Character spacing | Typography fine-tuning |
+| `set_line_height` | Vertical spacing | Text readability |
+| `set_paragraph_spacing` | Paragraph gaps | Content structure |
+| `set_text_case` | Case transformation | UPPER/lower/Title case |
+| `set_text_decoration` | Text styling | Underline/strikethrough |
+| `get_styled_text_segments` | Text analysis | Rich text inspection |
 | `load_font_async` | Font loading | Custom font access |
 
 ### 🎨 Component Tools
