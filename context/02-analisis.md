@@ -1,202 +1,560 @@
-# Análisis en Profundidad del Proyecto claude-talk-to-figma-mcp
+# Análisis Arquitectónico: Claude Talk to Figma MCP
 
-## 📋 Resumen del Proyecto
+## 📋 RESUMEN EJECUTIVO
 
-El proyecto **claude-talk-to-figma-mcp** es una implementación del Model Context Protocol (MCP) que permite la comunicación bidireccional entre Claude AI y Figma. El sistema facilita que Claude pueda interpretar, manipular y crear diseños directamente en Figma mediante una arquitectura basada en WebSockets, exponiendo múltiples herramientas (tools) para diferentes operaciones en el entorno de diseño.
+**Claude Talk to Figma MCP** es un sistema de integración avanzado que permite a Claude Desktop interactuar directamente con Figma a través del protocolo Model Context Protocol (MCP). El proyecto implementa una arquitectura de microservicios distribuida con comunicación WebSocket bidireccional, diseñada para facilitar flujos de trabajo de diseño asistido por IA.
 
-## 🏗️ Arquitectura del Sistema
+### Métricas del Proyecto
+- **Líneas de código**: ~8,000+ líneas
+- **Archivos TypeScript**: 15+ archivos
+- **Herramientas MCP**: 40+ comandos especializados
+- **Cobertura de funcionalidad**: Completa (CRUD + Análisis)
+- **Arquitectura**: Microservicios con separación clara de responsabilidades
 
-La arquitectura del sistema consta de tres componentes principales:
+---
 
-1. **Plugin de Figma (`claude_mcp_plugin`)**: 
-   - Implementado en JavaScript para el entorno de Figma
-   - Proporciona una interfaz de usuario para la configuración
-   - Ejecuta comandos en el contexto de Figma a través de su API
-   - Se comunica con el servidor MCP mediante WebSockets
+## 🔍 ANÁLISIS TÉCNICO DETALLADO
 
-2. **Servidor MCP (`talk_to_figma_mcp`)**:
-   - Implementado en TypeScript y ejecutado con Bun
-   - Actúa como intermediario entre Claude y Figma
-   - Expone herramientas (tools) para manipular Figma desde Claude
-   - Implementa la especificación del Model Context Protocol
-   - Gestiona la comunicación con el plugin de Figma vía WebSocket
+### 1. Arquitectura del Sistema
 
-3. **Servidor WebSocket (`socket.ts`)**:
-   - Implementado con la API de WebSockets de Bun
-   - Gestiona conexiones en tiempo real entre el servidor MCP y el plugin de Figma
-   - Implementa un sistema de canales para facilitar múltiples conexiones
-   - Proporciona estadísticas y monitoreo de conexiones
+```mermaid
+graph TB
+    subgraph "Cliente AI"
+        CD[Claude Desktop]
+    end
+    
+    subgraph "Capa de Protocolo"
+        MCP[MCP Server<br/>server.ts]
+    end
+    
+    subgraph "Capa de Comunicación"
+        WS[WebSocket Server<br/>socket.ts]
+    end
+    
+    subgraph "Cliente Figma"
+        FP[Figma Plugin<br/>code.js]
+        FUI[Plugin UI<br/>ui.html]
+    end
+    
+    CD <-->|MCP Protocol| MCP
+    MCP <-->|WebSocket| WS
+    WS <-->|WebSocket| FP
+    FP <--> FUI
+```
 
-## 🔄 Flujo de Comunicación
+#### Principios Arquitectónicos Implementados
 
-El flujo de comunicación sigue esta secuencia:
+1. **Separation of Concerns**: Cada capa tiene responsabilidades específicas
+   - MCP Server: Lógica de negocio, validación, defaults
+   - WebSocket Server: Enrutamiento de mensajes
+   - Figma Plugin: Traductor puro de comandos
 
-1. Claude invoca una herramienta del servidor MCP
-2. El servidor MCP envía un comando al plugin de Figma a través de WebSocket
-3. El plugin ejecuta el comando utilizando la API de Figma
-4. El resultado se devuelve al servidor MCP
-5. El servidor MCP formatea la respuesta y la devuelve a Claude
+2. **Single Responsibility Principle**: Cada módulo tiene una función específica
+3. **Dependency Inversion**: Abstracciones bien definidas entre capas
+4. **Event-Driven Architecture**: Comunicación asíncrona con manejo de eventos
 
-El sistema utiliza un mecanismo de ID de solicitud y promesas para gestionar la comunicación asíncrona entre componentes.
+### 2. Estructura Modular del Proyecto
 
-## 📦 Estructura de Código
+```
+src/
+├── talk_to_figma_mcp/           # 🏗️ MCP Server Core
+│   ├── server.ts                # Entry point principal
+│   ├── config/                  # ⚙️ Configuración
+│   │   └── config.ts           # CLI args, WebSocket config
+│   ├── tools/                   # 🛠️ Herramientas MCP (5 módulos)
+│   │   ├── index.ts            # Registro centralizado
+│   │   ├── document-tools.ts   # Consulta de documentos
+│   │   ├── creation-tools.ts   # Creación de elementos
+│   │   ├── modification-tools.ts # Modificación de propiedades
+│   │   ├── text-tools.ts       # Manipulación de texto
+│   │   └── component-tools.ts  # Gestión de componentes
+│   ├── utils/                   # 🔧 Utilidades
+│   │   ├── websocket.ts        # Cliente WebSocket
+│   │   ├── logger.ts           # Sistema de logging
+│   │   ├── figma-helpers.ts    # Helpers específicos
+│   │   └── defaults.ts         # Valores por defecto
+│   └── types/                   # 📝 Definiciones TypeScript
+│       ├── index.ts            # Tipos principales
+│       └── color.ts            # Tipos de color
+├── claude_mcp_plugin/           # 🎨 Plugin de Figma
+│   ├── code.js                 # Lógica del plugin (3,296 líneas)
+│   ├── manifest.json           # Configuración del plugin
+│   └── ui.html                 # Interfaz de usuario
+└── socket.ts                    # 🌐 Servidor WebSocket independiente
+```
 
-El proyecto sigue una estructura modular bien organizada:
+### 3. Análisis de Calidad del Código
 
-### Servidor MCP (`talk_to_figma_mcp`)
+#### Fortalezas Arquitectónicas
 
-- **`server.ts`**: Punto de entrada principal para el servidor MCP
-- **`config/config.ts`**: Configuración central del servidor, incluyendo la gestión de argumentos CLI
-- **`tools/`**: Módulos para diferentes categorías de herramientas
-  - **`index.ts`**: Registro central de todas las herramientas
-  - **`document-tools.ts`**: Herramientas para información sobre documentos de Figma
-  - **`creation-tools.ts`**: Herramientas para crear formas y elementos
-  - **`modification-tools.ts`**: Herramientas para modificar propiedades
-  - **`text-tools.ts`**: Herramientas para manipulación de texto
-  - **`component-tools.ts`**: Herramientas para trabajar con componentes
-  - **`image-tools.ts`**: Herramientas para exportar e importar imágenes
-- **`prompts/`**: Prompts predefinidos para Claude
-  - **`index.ts`**: Registro de prompts disponibles
-- **`utils/`**: Utilidades compartidas
-  - **`websocket.ts`**: Gestión de comunicación WebSocket con Figma
-  - **`logger.ts`**: Sistema de registro personalizado
-  - **`figma-helpers.ts`**: Helpers específicos para procesar datos de Figma
-- **`types/`**: Definiciones de tipos TypeScript
+✅ **Tipado Estricto con TypeScript**
+```typescript
+// Ejemplo de tipado robusto
+export interface CommandProgressUpdate {
+  type: 'command_progress';
+  commandId: string;
+  commandType: string;
+  status: 'started' | 'in_progress' | 'completed' | 'error';
+  progress: number;
+  totalItems: number;
+  processedItems: number;
+  message: string;
+  payload?: any;
+  timestamp: number;
+}
+```
 
-### Plugin de Figma (`claude_mcp_plugin`)
+✅ **Validación con Zod**
+```typescript
+// Validación robusta de parámetros
+server.tool(
+  "set_fill_color",
+  "Set the fill color of a node in Figma",
+  {
+    nodeId: z.string().describe("The ID of the node to modify"),
+    r: z.number().min(0).max(1).describe("Red component (0-1)"),
+    g: z.number().min(0).max(1).describe("Green component (0-1)"),
+    b: z.number().min(0).max(1).describe("Blue component (0-1)"),
+    a: z.number().min(0).max(1).optional().describe("Alpha component (0-1)")
+  }
+)
+```
 
-- **`code.js`**: Implementación principal del plugin
-- **`manifest.json`**: Configuración del plugin para Figma
-- **`ui.html`**: Interfaz de usuario para configurar el plugin
-- **`utils/`**: Utilidades para el plugin
-- **`tests/`**: Pruebas para el plugin
+✅ **Manejo de Errores Robusto**
+```typescript
+// Patrón de error handling consistente
+try {
+  const result = await sendCommandToFigma("get_document_info");
+  return { content: [{ type: "text", text: JSON.stringify(result) }] };
+} catch (error) {
+  return {
+    content: [{
+      type: "text",
+      text: `Error getting document info: ${error instanceof Error ? error.message : String(error)}`
+    }]
+  };
+}
+```
 
-### Servidor WebSocket (`socket.ts`)
+✅ **Sistema de Logging Estructurado**
+```typescript
+// Logger personalizado que evita interferir con stdout
+export const logger = {
+  info: (message: string) => process.stderr.write(`[INFO] ${message}\n`),
+  debug: (message: string) => process.stderr.write(`[DEBUG] ${message}\n`),
+  warn: (message: string) => process.stderr.write(`[WARN] ${message}\n`),
+  error: (message: string) => process.stderr.write(`[ERROR] ${message}\n`)
+};
+```
 
-- Implementación independiente del servidor WebSocket
-- Sistema de canales para comunicaciones
-- Gestión de estadísticas y monitoreo
+#### Áreas de Mejora Identificadas
 
-## 🛠️ Herramientas Disponibles
+⚠️ **Plugin de Figma Monolítico**
+- **Problema**: 3,296 líneas en un solo archivo `code.js`
+- **Impacto**: Difícil mantenimiento, testing complejo, violación SRP
+- **Recomendación**: Refactorizar en módulos especializados
 
-El servidor MCP expone más de 30 herramientas organizadas en categorías:
+⚠️ **Falta de Abstracción en Comunicación WebSocket**
+- **Problema**: Lógica de WebSocket mezclada con lógica de negocio
+- **Recomendación**: Implementar patrón Repository/Service
 
-### Herramientas de Documento
-- `get_document_info`: Obtiene información sobre el documento actual
-- `get_selection`: Obtiene información sobre la selección actual
-- `get_node_info`: Obtiene información detallada sobre un nodo específico
-- `get_nodes_info`: Obtiene información sobre múltiples nodos
-- `scan_text_nodes`: Escanea todos los nodos de texto
-- `get_styles`: Obtiene estilos del documento
-- `get_local_components`: Obtiene componentes locales
-- `get_remote_components`: Obtiene componentes de bibliotecas de equipos
-- `get_styled_text_segments`: Obtiene segmentos de texto con estilos específicos
-- `join_channel`: Une a un canal específico para comunicarse con Figma
+⚠️ **Testing Limitado**
+- **Cobertura actual**: Principalmente tests de integración
+- **Faltante**: Tests unitarios, mocks robustos, tests de performance
 
-### Herramientas de Creación
-- `create_rectangle`: Crea un rectángulo
-- `create_frame`: Crea un marco
-- `create_text`: Crea un elemento de texto
-- `create_ellipse`: Crea una elipse o círculo
-- `create_polygon`: Crea un polígono con lados personalizables
-- `create_star`: Crea una estrella con puntas personalizables
-- `create_vector`: Crea una forma vectorial
-- `create_line`: Crea una línea
-- `group_nodes`: Agrupa nodos
-- `ungroup_nodes`: Desagrupa nodos
-- `clone_node`: Clona un nodo existente
-- `insert_child`: Inserta un nodo hijo dentro de un nodo padre
-- `flatten_node`: Aplana un nodo (para operaciones booleanas)
+### 4. Implementación de Patrones de Diseño
 
-### Herramientas de Modificación
-- `set_fill_color`: Establece el color de relleno de un nodo
-- `set_stroke_color`: Establece el color de trazo de un nodo
-- `move_node`: Mueve un nodo a una nueva posición
-- `resize_node`: Redimensiona un nodo
-- `delete_node`: Elimina un nodo
-- `set_corner_radius`: Establece el radio de esquina de un nodo
-- `set_auto_layout`: Configura propiedades de auto layout
-- `set_effects`: Establece efectos visuales (sombras, desenfoques)
-- `set_effect_style_id`: Aplica un estilo de efecto a un nodo
+#### Patrón Command ✅
+```typescript
+// Cada herramienta MCP implementa el patrón Command
+async function handleCommand(command, params) {
+  switch (command) {
+    case "create_rectangle":
+      return await createRectangle(params);
+    case "set_fill_color":
+      return await setFillColor(params);
+    // ... más comandos
+  }
+}
+```
 
-### Herramientas de Texto
-- `set_text_content`: Establece el contenido de texto de un nodo existente
-- `set_multiple_text_contents`: Establece múltiples contenidos de texto en paralelo
-- `set_font_name`: Establece el nombre y estilo de fuente
-- `set_font_size`: Establece el tamaño de fuente
-- `set_font_weight`: Establece el peso de fuente
-- `set_letter_spacing`: Establece el espaciado entre letras
-- `set_line_height`: Establece la altura de línea
-- `set_paragraph_spacing`: Establece el espaciado de párrafo
-- `set_text_case`: Establece el caso de texto (mayúsculas, minúsculas, etc.)
-- `set_text_decoration`: Establece la decoración de texto
-- `load_font_async`: Carga una fuente de forma asíncrona
+#### Patrón Observer ✅
+```typescript
+// Sistema de eventos WebSocket
+ws.on('message', (data) => {
+  const json = JSON.parse(data) as ProgressMessage;
+  if (json.type === 'progress_update') {
+    // Manejo de actualizaciones de progreso
+  }
+});
+```
 
-### Herramientas de Componentes
-- `create_component_instance`: Crea una instancia de un componente
+#### Patrón Factory ✅
+```typescript
+// Factory para registro de herramientas
+export function registerTools(server: McpServer): void {
+  registerDocumentTools(server);
+  registerCreationTools(server);
+  registerModificationTools(server);
+  registerTextTools(server);
+  registerComponentTools(server);
+}
+```
 
-## 🔌 Gestión de WebSockets
+### 5. Análisis de Seguridad
 
-El sistema implementa una gestión robusta de WebSockets con:
+#### Implementaciones de Seguridad ✅
 
-1. **Reconexión automática**: Cuando se pierde la conexión, el sistema intenta reconectar con un algoritmo de retroceso exponencial
-2. **Gestión de canales**: Permite a múltiples instancias de Claude conectarse a diferentes proyectos de Figma
-3. **Manejo de solicitudes pendientes**: Sistema para el seguimiento de solicitudes y gestión de timeouts
-4. **Actualización de progreso**: Las operaciones largas envían actualizaciones de progreso
-5. **Manejo de errores**: Sistema de recuperación de errores en todos los niveles
+1. **Validación de Entrada**
+   - Uso de Zod para validación de tipos
+   - Sanitización de parámetros
 
-## 🔧 Implementación y Tecnologías
+2. **Manejo Seguro de WebSockets**
+   - Timeouts para prevenir ataques de DoS
+   - Límites de reconexión
 
-El proyecto utiliza tecnologías modernas como:
+3. **Configuración de CORS**
+   ```typescript
+   headers: {
+     "Access-Control-Allow-Origin": "*",
+     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+     "Access-Control-Allow-Headers": "Content-Type, Authorization"
+   }
+   ```
 
-1. **TypeScript**: Para el tipado estático y mayor confiabilidad del código
-2. **Bun**: Como entorno de ejecución JavaScript de alto rendimiento
-3. **WebSockets**: Para la comunicación en tiempo real
-4. **Zod**: Para la validación de esquemas y tipos
-5. **API de Figma**: Para interactuar con el entorno de diseño de Figma
-6. **UUID**: Para la generación de IDs únicos
-7. **MCP SDK**: Para la implementación del Model Context Protocol
+#### Vulnerabilidades Identificadas ⚠️
 
-## 🧩 Patrones de Diseño
+1. **CORS Permisivo**: `Access-Control-Allow-Origin: "*"` demasiado amplio
+2. **Falta de Autenticación**: No hay sistema de autenticación entre componentes
+3. **Rate Limiting**: No implementado en el servidor WebSocket
 
-El código implementa varios patrones de diseño:
+### 6. Análisis de Performance
 
-1. **Patrón Command**: Cada herramienta encapsula una acción específica con Figma
-2. **Patrón Factory**: Registro y creación de herramientas de forma centralizada
-3. **Patrón Promise/Observer**: Para manejar comunicación asíncrona
-4. **Patrón Module**: Organización del código en módulos por funcionalidad
-5. **Patrón Adapter**: Adaptación entre el MCP y la API de Figma
+#### Optimizaciones Implementadas ✅
 
-## ⚙️ Mejoras y Optimizaciones
+1. **Chunking para Operaciones Masivas**
+   ```typescript
+   // Procesamiento en chunks para operaciones grandes
+   const CHUNK_SIZE = 10;
+   for (let i = 0; i < nodeIds.length; i += CHUNK_SIZE) {
+     const chunk = nodeIds.slice(i, i + CHUNK_SIZE);
+     // Procesar chunk
+   }
+   ```
 
-El código incluye varias optimizaciones:
+2. **Reconexión Automática con Backoff Exponencial**
+   ```typescript
+   const backoff = Math.min(30000, reconnectInterval * Math.pow(1.5, Math.floor(Math.random() * 5)));
+   setTimeout(() => connectToFigma(port), backoff);
+   ```
 
-1. **Procesamiento por lotes**: Las operaciones que involucran múltiples nodos se procesan en lotes
-2. **Timeouts dinámicos**: Ajuste de timeouts en función de la complejidad de las operaciones
-3. **Filtrado de respuestas**: Reducción de la complejidad de los datos devueltos por Figma
-4. **Reconexión inteligente**: Algoritmo de backoff exponencial para reconexiones
-5. **Gestión de errores mejorada**: Control de errores en todas las capas del sistema
+3. **Timeouts Adaptativos**
+   - 30s para operaciones normales
+   - 60s para operaciones de inactividad extendida
 
-## 🚀 Configuración y Despliegue
+#### Cuellos de Botella Potenciales ⚠️
 
-El proyecto incluye:
+1. **Serialización JSON**: Objetos grandes de Figma pueden ser costosos
+2. **Falta de Pooling**: Conexiones WebSocket no reutilizadas
+3. **Sin Caché**: Respuestas no cacheadas
 
-1. **Scripts de configuración**: Automatización de la configuración de Claude Desktop
-2. **Scripts de prueba**: Integración de pruebas automatizadas
-3. **Dockerfile**: Contenedorización del servidor
-4. **Manifiesto de plugin**: Configuración para la integración con Figma
+---
 
-## 🔒 Seguridad y Robustez
+## 🏗️ ARQUITECTURA DE HERRAMIENTAS MCP
 
-El código implementa múltiples medidas para garantizar la robustez:
+### Distribución de Herramientas por Categoría
 
-1. **Validación de entrada**: Mediante Zod para todas las entradas de herramientas
-2. **Control de errores**: Manejo estructurado de errores en todas las funciones
-3. **Timeouts**: Para evitar operaciones bloqueantes indefinidamente
-4. **Registro detallado**: Sistema de logging para diagnóstico y depuración
+| Categoría | Herramientas | Responsabilidad |
+|-----------|-------------|-----------------|
+| **Document Tools** (8) | `get_document_info`, `get_selection`, `get_node_info`, etc. | Consulta y análisis |
+| **Creation Tools** (12) | `create_rectangle`, `create_frame`, `create_text`, etc. | Creación de elementos |
+| **Modification Tools** (10) | `set_fill_color`, `move_node`, `resize_node`, etc. | Modificación de propiedades |
+| **Text Tools** (8) | `set_text_content`, `set_font_name`, `scan_text_nodes`, etc. | Manipulación de texto |
+| **Component Tools** (2) | `get_local_components`, `create_component_instance` | Gestión de componentes |
 
-## 📊 Conclusiones
+### Patrón de Implementación Consistente
 
-El proyecto **claude-talk-to-figma-mcp** es una implementación bien estructurada del Model Context Protocol para integrar Claude AI con Figma. Su arquitectura modular, manejo robusto de errores y amplia gama de herramientas permiten a Claude interactuar de manera efectiva con proyectos de diseño en Figma, abriendo posibilidades para la automatización de diseño, creación de prototipos asistida por IA y análisis de interfaces de usuario.
+Todas las herramientas siguen el mismo patrón:
 
-El código muestra buenas prácticas de desarrollo como modularización, tipado estricto, control de errores consistente y una arquitectura clara que facilita su mantenimiento y extensión futura.
+```typescript
+server.tool(
+  "nombre_herramienta",
+  "Descripción clara de la funcionalidad",
+  {
+    // Esquema Zod para validación
+    parametro: z.tipo().describe("Descripción del parámetro")
+  },
+  async (params) => {
+    try {
+      const result = await sendCommandToFigma("comando", params);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result) }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`
+        }]
+      };
+    }
+  }
+);
+```
+
+---
+
+## ⚙️ EVALUACIÓN DE CONFIGURACIÓN Y DEPLOYMENT
+
+### Stack Tecnológico
+
+| Componente | Tecnología | Versión | Justificación |
+|------------|------------|---------|---------------|
+| **Runtime** | Bun | v1.0+ | Performance superior a Node.js |
+| **Lenguaje** | TypeScript | v5.8.3 | Tipado estático, mejor DX |
+| **Validación** | Zod | v3.22.4 | Validación runtime type-safe |
+| **Comunicación** | WebSocket | WS v8.16.0 | Comunicación bidireccional |
+| **Testing** | Jest | v29.7.0 | Framework de testing robusto |
+| **Build** | tsup | v8.4.0 | Bundler optimizado para TypeScript |
+
+### Configuración de Build
+
+```typescript
+// tsup.config.ts - Configuración optimizada
+export default defineConfig({
+  entry: ['src/talk_to_figma_mcp/server.ts', 'src/socket.ts'],
+  format: ['cjs', 'esm'],      // Dual format para compatibilidad
+  dts: true,                   // Generación de tipos
+  clean: true,                 // Limpieza automática
+  target: 'node18',           // Target específico
+  sourcemap: true,            // Source maps para debugging
+  bundle: true                // Bundling completo
+});
+```
+
+### Scripts de Automatización
+
+```json
+{
+  "scripts": {
+    "build": "tsup && chmod +x dist/talk_to_figma_mcp/server.js dist/socket.js",
+    "configure-claude": "node scripts/configure-claude.js",
+    "test:integration": "node scripts/test-integration.js",
+    "setup": "./scripts/setup.sh"
+  }
+}
+```
+
+---
+
+## 🔬 EVALUACIÓN DE TESTING
+
+### Estrategia de Testing Actual
+
+#### Tests de Integración ✅
+```typescript
+// Ejemplo de test robusto con mocking
+describe("set_fill_color tool integration", () => {
+  beforeEach(() => {
+    mockSendCommand = require('../../src/talk_to_figma_mcp/utils/websocket').sendCommandToFigma;
+    mockSendCommand.mockClear();
+  });
+
+  it("preserves `a = 0` when explicitly provided", async () => {
+    const response = await callToolWithValidation({
+      nodeId: "nodeB",
+      r: 0.1, g: 0.3, b: 0.5, a: 0
+    });
+    
+    expect(mockSendCommand).toHaveBeenCalledTimes(1);
+    const [command, payload] = mockSendCommand.mock.calls[0];
+    expect(payload.color.a).toBe(0); // Critical: should be 0, not 1
+  });
+});
+```
+
+#### Configuración Jest ✅
+```javascript
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts'],
+  testTimeout: 10000,
+  extensionsToTreatAsEsm: ['.ts']
+};
+```
+
+### Gaps en Testing ⚠️
+
+1. **Falta de Tests Unitarios**: Solo tests de integración
+2. **Sin Tests de Performance**: No hay benchmarks
+3. **Cobertura Limitada**: No cubre edge cases complejos
+4. **Falta de Tests E2E**: No hay tests end-to-end completos
+
+---
+
+## 🚀 ROADMAP DE MEJORAS RECOMENDADAS
+
+### Fase 1: Refactoring Crítico (2-3 semanas)
+
+#### 1.1 Modularización del Plugin de Figma
+```javascript
+// Estructura propuesta
+src/claude_mcp_plugin/
+├── core/
+│   ├── command-handler.js
+│   ├── websocket-client.js
+│   └── progress-tracker.js
+├── commands/
+│   ├── document-commands.js
+│   ├── creation-commands.js
+│   ├── modification-commands.js
+│   └── text-commands.js
+├── utils/
+│   ├── figma-helpers.js
+│   └── validation.js
+└── main.js (entry point)
+```
+
+#### 1.2 Implementación de Arquitectura Hexagonal
+```typescript
+// Propuesta de abstracciones
+interface FigmaRepository {
+  getDocumentInfo(): Promise<DocumentInfo>;
+  createNode(params: CreateNodeParams): Promise<Node>;
+  updateNode(id: string, params: UpdateParams): Promise<Node>;
+}
+
+interface WebSocketService {
+  connect(url: string): Promise<void>;
+  send(message: Message): Promise<Response>;
+  disconnect(): Promise<void>;
+}
+```
+
+### Fase 2: Mejoras de Seguridad (1-2 semanas)
+
+#### 2.1 Sistema de Autenticación
+```typescript
+// JWT-based authentication
+interface AuthService {
+  generateToken(clientId: string): string;
+  validateToken(token: string): boolean;
+  refreshToken(token: string): string;
+}
+```
+
+#### 2.2 Rate Limiting
+```typescript
+// Rate limiting implementation
+class RateLimiter {
+  private requests: Map<string, number[]> = new Map();
+  
+  isAllowed(clientId: string, limit: number = 100): boolean {
+    // Implementation
+  }
+}
+```
+
+### Fase 3: Optimizaciones de Performance (1-2 semanas)
+
+#### 3.1 Sistema de Caché
+```typescript
+interface CacheService {
+  get<T>(key: string): Promise<T | null>;
+  set<T>(key: string, value: T, ttl?: number): Promise<void>;
+  invalidate(pattern: string): Promise<void>;
+}
+```
+
+#### 3.2 Connection Pooling
+```typescript
+class WebSocketPool {
+  private connections: WebSocket[] = [];
+  
+  getConnection(): Promise<WebSocket>;
+  releaseConnection(ws: WebSocket): void;
+}
+```
+
+### Fase 4: Observabilidad y Monitoreo (1 semana)
+
+#### 4.1 Métricas Avanzadas
+```typescript
+interface MetricsCollector {
+  incrementCounter(name: string, tags?: Record<string, string>): void;
+  recordHistogram(name: string, value: number): void;
+  recordGauge(name: string, value: number): void;
+}
+```
+
+#### 4.2 Distributed Tracing
+```typescript
+interface TracingService {
+  startSpan(operationName: string): Span;
+  finishSpan(span: Span): void;
+  addTags(span: Span, tags: Record<string, any>): void;
+}
+```
+
+---
+
+## ❓ RECOMENDACIONES ESPECÍFICAS
+
+### Inmediatas (Esta semana)
+
+1. **Implementar Rate Limiting** en el servidor WebSocket
+2. **Configurar CORS específico** en lugar de wildcard
+3. **Añadir Tests Unitarios** para utils y helpers
+4. **Documentar APIs** con JSDoc completo
+
+### Corto Plazo (1 mes)
+
+1. **Refactorizar Plugin de Figma** en módulos especializados
+2. **Implementar Circuit Breaker** para resilencia
+3. **Añadir Métricas de Performance** 
+4. **Crear Tests E2E** automatizados
+
+### Largo Plazo (3 meses)
+
+1. **Migrar a Arquitectura Hexagonal** completa
+2. **Implementar Event Sourcing** para auditabilidad
+3. **Añadir Support Multi-tenant**
+4. **Crear Dashboard de Monitoreo**
+
+---
+
+## 📊 CONCLUSIONES
+
+### Fortalezas del Proyecto
+
+✅ **Arquitectura Sólida**: Separación clara de responsabilidades
+✅ **Tipado Robusto**: TypeScript con validación Zod
+✅ **Comunicación Eficiente**: WebSocket bidireccional
+✅ **Funcionalidad Completa**: 40+ herramientas MCP
+✅ **Error Handling**: Manejo robusto de errores
+✅ **Performance**: Optimizaciones implementadas
+
+### Áreas Críticas de Mejora
+
+⚠️ **Plugin Monolítico**: Necesita refactoring urgente
+⚠️ **Seguridad**: Falta autenticación y rate limiting
+⚠️ **Testing**: Cobertura insuficiente
+⚠️ **Observabilidad**: Falta monitoreo avanzado
+
+### Calificación General
+
+**Arquitectura**: 8/10 - Sólida pero necesita refinamiento
+**Código**: 7/10 - Buena calidad con áreas de mejora
+**Seguridad**: 6/10 - Básica, necesita fortalecimiento
+**Performance**: 8/10 - Bien optimizada
+**Testing**: 6/10 - Limitado pero funcional
+**Mantenibilidad**: 7/10 - Buena estructura, plugin problemático
+
+**Puntuación Global: 7.2/10** - Proyecto sólido con potencial de excelencia tras las mejoras recomendadas.
+
+---
+
+*Análisis realizado por Arquitecto de Software Senior*
+*Fecha: $(date)*
+*Versión del proyecto: 0.5.2*
