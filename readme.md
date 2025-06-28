@@ -13,9 +13,9 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop and other AI to
 
 ### Installation
 1. **Setup**:
-   - **macOs / Linux**
+   - **macOs / Linux**: 
    `git clone https://github.com/arinspunk/claude-talk-to-figma-mcp.git && cd claude-talk-to-figma-mcp && bun install && bun run build`
-   - **Windows**
+   - **Windows**: 
    `git clone https://github.com/arinspunk/claude-talk-to-figma-mcp.git && cd claude-talk-to-figma-mcp && bun install && bun run build:win`
 2. **Configure Claude**: `bun run configure-claude` (restart Claude Desktop)
 3. **Install Figma Plugin**: Import `src/claude_mcp_plugin/manifest.json` in Figma → Menu → Plugins → Development
@@ -281,6 +281,7 @@ src/
 
 #### Recent Contributors
 - **[Taylor Smits](https://github.com/smitstay)** - Fixed opacity handling in color functions and added automated tests ([PR #13](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/13), [PR #14](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/14))
+- **[easyhak](https://github.com/easyhak)** - Fixed build script not working on Windows OS ([PR #10](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/10))
 
 ---
 
