@@ -144,7 +144,15 @@ Claude Desktop ↔ MCP Server ↔ WebSocket Server ↔ Figma Plugin
    git clone https://github.com/arinspunk/claude-talk-to-figma-mcp.git
    cd claude-talk-to-figma-mcp
    bun install
+   ```
+   run the appropriate command based on your operating system:
+   - **macOs / Linux**
+   ```bash
    bun run build
+   ```
+   - **Windows**
+   ```bash
+   bun run build:win
    ```
 
 2. **Configure Claude Desktop**:
