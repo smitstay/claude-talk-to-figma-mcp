@@ -1,7 +1,7 @@
 {
   "name": "claude-talk-to-figma-mcp",
   "description": "Claude Desktop Talk to Figma MCP",
-  "version": "0.5.0",
+  "version": "0.5.2",
   "module": "dist/talk_to_figma_mcp/server.js",
   "main": "dist/talk_to_figma_mcp/server.js",
   "bin": {
@@ -10,9 +10,10 @@
   },
   "files": [
     "dist",
-    "README.md",
+    "readme.md",
     "LICENSE",
-    "TESTING.md"
+    "TESTING.md",
+    "CHANGELOG.md"
   ],
   "type": "module",
   "scripts": {
@@ -25,11 +26,17 @@
     "dev": "bun run build:watch",
     "pub:release": "bun run build && npm publish",
     "configure-claude": "node scripts/configure-claude.js",
-    "test": "node scripts/test-integration.js"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:integration": "node scripts/test-integration.js"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/jest": "^29.5.12",
     "bun-types": "^1.2.9",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3"
   },
@@ -52,7 +59,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/arinspunk/claude-talk-to-figma-mcp"
+    "url": "git+https://github.com/arinspunk/claude-talk-to-figma-mcp.git"
   },
   "bugs": {
     "url": "https://github.com/arinspunk/claude-talk-to-figma-mcp/issues"

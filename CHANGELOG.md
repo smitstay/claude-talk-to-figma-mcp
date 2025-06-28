@@ -1,0 +1,88 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.5.2] - 2025-01-19
+
+### Fixed
+- Fixed critical opacity handling bug in `set_stroke_color` where `a: 0` (transparent) was incorrectly converted to `a: 1` (opaque)
+- Fixed stroke weight handling where `strokeWeight: 0` (no border) was incorrectly converted to `strokeWeight: 1`
+- Resolved problematic `||` operator usage that affected falsy values in color and stroke operations
+
+### Added
+- Extended `applyDefault()` utility function to handle stroke weight defaults safely
+- Added `FIGMA_DEFAULTS.stroke.weight` constant for centralized stroke configuration
+- Comprehensive test suite for `set_stroke_color` covering edge cases and integration scenarios
+- Enhanced validation for RGB components in stroke operations
+
+### Changed
+- Improved architectural consistency by applying the same safe defaults pattern from `set_fill_color` to `set_stroke_color`
+- Enhanced separation of concerns between MCP layer (business logic) and Figma plugin (pure translator)
+- Renamed `weight` parameter to `strokeWeight` for better clarity and consistency
+- Updated Figma plugin to expect complete data from MCP layer instead of handling defaults internally
+
+### Technical Details
+- Replaced `strokeWeight: strokeWeight || 1` with `applyDefault(strokeWeight, FIGMA_DEFAULTS.stroke.weight)`
+- Enhanced type safety with proper `Color` and `ColorWithDefaults` interface usage
+- Improved error messages and validation for better debugging experience
+
+## [0.5.1] - 2025-06-15
+
+### Fixed
+- Fixed opacity handling in `set_fill_color` to properly respect alpha values
+- Added `applyColorDefaults` function to ensure appropriate default values for colors
+
+### Added
+- Added automated tests for color functions and node manipulation
+
+### Changed
+- Improved TypeScript typing for colors and related properties
+- General code cleanup and better utility organization
+
+## [0.5.0] - 2025-05-28
+
+### Changed
+- Implemented modular tool structure for better maintainability
+- Enhanced handling of complex operations with timeouts and chunking
+- Improved error handling and recovery for all tools
+- Improved TypeScript typing and standardized error handling
+
+### Fixed
+- Fixed channel connection issues with improved state management
+- Resolved timeout problems in `flatten_node`, `create_component_instance`, and `set_effect_style_id`
+- Enhanced remote component access with better error handling
+
+### Added
+- Comprehensive documentation of tool categories and capabilities
+
+## [0.4.0] - 2025-04-15
+
+### Added
+- New tools for creating advanced shapes:
+  - `create_ellipse`: Creation of ellipses and circles
+  - `create_polygon`: Creation of polygons with customizable sides
+  - `create_star`: Creation of stars with customizable points and inner radius
+  - `create_vector`: Creation of complex vector shapes
+  - `create_line`: Creation of straight lines
+- Advanced text and font manipulation capabilities
+- New commands for controlling typography: font styles, spacing, text case, and more
+- Support for accessing team library components
+- Improved error handling and timeout management
+- Enhanced text scanning capabilities
+
+### Changed
+- Improvements in documentation and usage examples
+
+## [0.3.0] - 2025-03-10
+
+### Added
+- Added `set_auto_layout` command to configure auto layout properties for frames and groups
+- Support for settings for layout direction, padding, item spacing, alignment and more
+
+## [0.2.0] - 2025-02-01
+
+### Added
+- Initial public release with Claude Desktop support
