@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2025-01-20
+
+### Added
+- Added Windows-specific build command (`build:win`: `tsup`) for improved cross-platform compatibility
+- Enhanced build process to support development on Windows systems without chmod dependency
+
+### Fixed
+- Resolved Windows build compatibility issues where `chmod` command would fail on Windows systems
+- Improved developer experience for Windows users by providing dedicated build script
+
+### Changed
+- Separated Unix/Linux build process (with executable permissions) from Windows build process
+- Updated installation documentation to reflect platform-specific build commands
+
 ## [0.5.2] - 2025-01-19
 
 ### Fixed

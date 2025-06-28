@@ -290,11 +290,11 @@ src/
 
 ## 📋 Version History
 
-### Current: 0.5.2
-- **Critical Bug Fixes**: Fixed opacity and stroke weight handling
-- **Architectural Improvements**: Extended safe defaults pattern
-- **Enhanced Testing**: Comprehensive test coverage
-- **Code Quality**: Improved type safety and validation
+### Current: 0.5.3
+- **Windows Compatibility**: Added dedicated build command for Windows systems
+- **Cross-Platform Support**: Improved developer experience across all operating systems
+- **Build Process Enhancement**: Separated Unix/Linux and Windows build workflows
+- **Developer Experience**: Resolved chmod dependency issues on Windows
 
 See [CHANGELOG.md](CHANGELOG.md) for complete version history.
 
