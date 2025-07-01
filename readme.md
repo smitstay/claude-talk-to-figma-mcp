@@ -157,7 +157,6 @@ Claude Desktop ↔ MCP Server ↔ WebSocket Server ↔ Figma Plugin
 
 1. **Download DXT Package**:
    - Get the latest `claude-talk-to-figma-mcp.dxt` from [releases](https://github.com/arinspunk/claude-talk-to-figma-mcp/releases)
-   - File size: ~7.9MB (includes all dependencies)
 
 2. **Install in Claude Desktop**:
    - Double-click the `.dxt` file, or
